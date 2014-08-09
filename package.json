@@ -1,0 +1,21 @@
+{
+  "name": "aspen",
+  "version": "0.0.1",
+  "description": "Private search engine for historical documents",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ian Langworth",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.6.2",
+    "browserify": "^5.9.1",
+    "coffee-middleware": "^0.2.1",
+    "coffee-script": "^1.7.1",
+    "express": "^4.8.2",
+    "forever": "^0.11.1",
+    "jade": "^1.5.0",
+    "less-middleware": "^1.0.3",
+    "morgan": "^1.2.2"
+  }
+}
