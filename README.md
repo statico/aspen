@@ -5,6 +5,8 @@
     $ npm install
     $ ln -s ../solr-4.9.0 solr-dist
     $ ln -s ../data static/data
+    $ npm run solr &
+    $ ./import.coffee
 
 ## commands
 
