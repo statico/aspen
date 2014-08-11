@@ -3,10 +3,14 @@
   "version": "0.0.1",
   "description": "Private search engine for historical documents",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon -e coffee -x coffee -w app.coffee app.coffee",
+    "solr": "java -Dsolr.solr.home=solr-home -Djetty.home=solr-dist/example -jar solr-dist/example/start.jar"
   },
   "author": "Ian Langworth",
   "license": "MIT",
+  "engines" : {
+    "node": ">=0.10.3"
+  },
   "dependencies": {
     "body-parser": "^1.6.2",
     "browserify": "^5.9.1",
@@ -18,6 +22,7 @@
     "less-middleware": "^1.0.3",
     "line-reader": "^0.2.4",
     "morgan": "^1.2.2",
+    "nodemon": "^1.2.1",
     "promise": "^5.0.0",
     "request": "^2.40.0",
     "walk": "^2.3.3"

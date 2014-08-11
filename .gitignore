@@ -1,3 +1,7 @@
-static/data
 env
+logs
 node_modules
+solr-dist
+solr-home/collection1/data
+solr-webapp
+static/data

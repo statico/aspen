@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="aspen">
+
+   <field name="_version_" type="long" indexed="true" stored="true"/>
+
+   <field name="id" required="true" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="title" required="true" type="text_general" indexed="true" stored="true" multiValued="false"/>
+   <field name="url" required="true" type="text_general" indexed="true" stored="true" multiValued="false"/>
+   <field name="filetype" required="true" type="string" indexed="true" stored="true" multiValued="false"/>
+   <field name="content" required="true" type="text_general" indexed="true" stored="true" multiValued="false"/>
+
+</schema>
