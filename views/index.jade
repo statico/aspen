@@ -1,10 +1,29 @@
 doctype html
-html
+html(ng-app="aspen")
   head
     title= title
     link(rel='stylesheet', href='/css/main.css')
-    script(src='/js/angular.min.js')
+    script(src='/js/angular-1.2.21/angular.js')
+    script(src='/js/angular-1.2.21/angular-sanitize.js')
     script(src='/js/main.js')
-  body
-    div.container
-      h1 hello
+  body(ng-controller='SearchController')
+
+    div.topnav
+      div.container
+        form
+          img(src='wsc.jpg').wsc.item
+          label(for='query').lead.item Aspen 2.0
+          input(id='query', type='text', ng-model='query').item
+          button(ng-click='doSearch()').btn.btn-primary.item Search
+
+    div.container.results
+
+      p {{ results.count }} items found.
+
+      div.result(ng-repeat='item in results.items')
+        a(href='{{ item.url }}').title {{ item.title }}
+        p(ng-bind-html='item.snippet').snippet
+
+
+      // pre(ng-hide='!results') {{ results }}
+

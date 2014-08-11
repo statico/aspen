@@ -16,6 +16,10 @@
     "forever": "^0.11.1",
     "jade": "^1.5.0",
     "less-middleware": "^1.0.3",
-    "morgan": "^1.2.2"
+    "line-reader": "^0.2.4",
+    "morgan": "^1.2.2",
+    "promise": "^5.0.0",
+    "request": "^2.40.0",
+    "walk": "^2.3.3"
   }
 }

@@ -6,19 +6,10 @@ express = require 'express'
 fs = require 'fs'
 less = require 'less-middleware'
 logger = require 'morgan'
+request = require 'request'
 pathlib = require 'path'
 
-# Copy env from ./env
-env = pathlib.join __dirname, 'env'
-if fs.existsSync env
-  lines = fs.readFileSync(env, 'utf8').split '\n'
-  for line in lines
-    continue unless line
-    [key, value] = line.split '='
-    unless key and value
-      console.warn "Ignoring env line: '#{ line }'"
-      continue
-    process.env[key] = value
+require './localenv'
 
 app = express()
 app.set 'views', pathlib.join(__dirname, 'views')
@@ -30,15 +21,25 @@ app.use less(pathlib.join(__dirname, 'static'))
 app.use coffeeMiddleware(src: pathlib.join(__dirname, 'static'))
 app.use express.static(pathlib.join(__dirname, 'static'))
 
-app.use (err, req, res, next) ->
-  res.status err.status or 500
-  res.render 'error',
-    message: err.message
-    error: {}
-  return
-
 app.get '/', (req, res) ->
   res.render 'index'
+
+app.get '/query', (req, res) ->
+  res.header 'Cache-Control', 'no-cache'
+  options =
+    method: 'GET'
+    url: "#{ process.env.SOLR_URL }/query"
+    json: true
+    qs:
+      q: req.query.q
+      hl: true
+      fl: 'id,url,title'
+      'hl.fl': 'content'
+      'hl.fragsize': 300
+      'hl.snippets': 3
+      'hl.mergeContiguous': true
+  request options, (err, result, body) ->
+    res.json body
 
 port = process.env.PORT ? 8080
 app.listen port, ->
