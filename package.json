@@ -4,7 +4,7 @@
   "description": "Private search engine for historical documents",
   "scripts": {
     "dev": "nodemon -e coffee -x coffee -w app.coffee app.coffee",
-    "solr": "java -Dsolr.solr.home=solr-home -Djetty.home=solr-dist/example -jar solr-dist/example/start.jar"
+    "solr": "java -Dsolr.solr.home=solr-home -Djetty.home=solr-dist/example -server -jar solr-dist/example/start.jar"
   },
   "author": "Ian Langworth",
   "license": "MIT",
