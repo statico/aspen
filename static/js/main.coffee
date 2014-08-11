@@ -6,6 +6,15 @@ angular.module('aspen', ['ngSanitize'])
     ['$scope', '$http', '$sce', '$location', '$rootScope'
       ($scope, $http, $sce, $location, $rootScope) ->
 
+        throttle = do ->
+          timer = null
+          return (fn) ->
+            clearTimeout timer
+            timer = setTimeout fn, 400
+
+        $scope.onSearchKeyDown = ->
+          throttle $scope.doSearch
+
         $scope.doSearch = ->
           $location.path $scope.query
           $http.get('/query', params: q: $scope.query).success (data) ->
@@ -18,7 +27,7 @@ angular.module('aspen', ['ngSanitize'])
                 id: id
                 url: "#{ DATA_BASEURL }/#{ url }"
                 title: title?[0] ? url
-                snippet: $sce.trustAsHtml(data.highlighting[id].content?.join ' ... ')
+                snippet: $sce.trustAsHtml(data.highlighting[id].text?.join ' ... ')
               }
 
         $scope.onLocationChange = ->

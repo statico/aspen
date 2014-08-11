@@ -11,6 +11,8 @@ pathlib = require 'path'
 
 require './localenv'
 
+MAX_DOCUMENT_CHARACTERS = 4e6
+
 app = express()
 app.set 'views', pathlib.join(__dirname, 'views')
 app.set 'view engine', 'jade'
@@ -32,12 +34,13 @@ app.get '/query', (req, res) ->
     json: true
     qs:
       q: req.query.q
-      hl: true
       fl: 'id,url,title'
-      'hl.fl': 'content'
-      'hl.fragsize': 300
+      'hl': true
+      'hl.fl': 'text'
       'hl.snippets': 3
       'hl.mergeContiguous': true
+      'hl.maxAnalyzedChars': MAX_DOCUMENT_CHARACTERS
+      'hl.score.pivot': 700
   request options, (err, result, body) ->
     res.json body
 

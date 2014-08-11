@@ -151,7 +151,11 @@
   <field name="content" type="text_general" indexed="false" stored="true" multiValued="true"/>
   <!-- catchall field, containing all other searchable text fields (implemented
         via copyField further on in this schema  -->
-  <field name="text" type="text_en_splitting" indexed="true" stored="false" multiValued="true"/>
+  <field name="text" type="text_en"
+    indexed="true" stored="true" multiValued="true"
+    termVectors="true" termPositions="true" termOffsets="true"
+    storeOffsetsWithPositions="true"
+  />
   <!-- catchall text field that indexes tokens both normally and in reverse for efficient
         leading wildcard queries. -->
   <field name="text_rev" type="text_general_rev" indexed="true" stored="false" multiValued="true"/>
