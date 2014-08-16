@@ -1,5 +1,7 @@
+# Aspen client app. License: MIT
+
 DATA_BASEURL = '/data'
-ITEMS_PER_PAGE = 10
+ITEMS_PER_PAGE = 10 # Sync with app.coffee
 
 throttle = do ->
   timer = null

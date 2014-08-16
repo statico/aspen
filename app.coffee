@@ -1,4 +1,6 @@
 #!./node_modules/coffee-script/bin/coffee
+#
+# Aspen frontend web server. License: MIT
 
 bodyParser = require 'body-parser'
 coffeeMiddleware = require 'coffee-middleware'
@@ -51,7 +53,7 @@ app.get '/query', (req, res) ->
       defType: 'edismax'
       pf: 'text' # Boost phrases.
       ps: 100
-      bq: 'url:*pdf^5'
+      bq: 'url:*pdf^5' # Boost PDF documents (whcih are newer & higher quality)
   request options, (err, result, body) ->
     res.json body
 
