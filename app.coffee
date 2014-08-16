@@ -48,9 +48,10 @@ app.get '/query', (req, res) ->
       'hl.mergeContiguous': true
       'hl.maxAnalyzedChars': MAX_DOCUMENT_CHARACTERS
       'hl.score.pivot': 2000
-      defType: 'dismax'
+      defType: 'edismax'
       pf: 'text' # Boost phrases.
       ps: 100
+      bq: 'url:*pdf^5'
   request options, (err, result, body) ->
     res.json body
 
