@@ -24,7 +24,11 @@ app.use less(pathlib.join(__dirname, 'static'))
 app.use coffeeMiddleware(src: pathlib.join(__dirname, 'static'))
 
 app.get '/', (req, res) ->
-  res.render 'index'
+  if req.query.q
+    # Legacy redirect.
+    res.redirect "/#/#{ encodeURIComponent req.query.q }"
+  else
+    res.render 'index'
 
 app.get '/query', (req, res) ->
   res.header 'Cache-Control', 'no-cache'
