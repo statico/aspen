@@ -13,7 +13,7 @@ html(ng-app="aspen")
         form
           img(src='wsc.jpg').wsc.item
           label(for='query').lead.item Aspen 2.0
-          input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()').item
+          input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()', autofocus).item
           button(ng-click='doSearch()').btn.btn-primary.item Search
           a(href='/data/').btn.btn-default.item.hidden-xs Browse
 
