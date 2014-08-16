@@ -1,7 +1,7 @@
 doctype html
 html(ng-app="aspen")
   head
-    title= title
+    title(ng-bind='title') Aspen
     link(rel='stylesheet', href='/css/main.css')
     script(src='/js/angular-1.2.21/angular.js')
     script(src='/js/angular-1.2.21/angular-sanitize.js')
@@ -15,19 +15,30 @@ html(ng-app="aspen")
           label(for='query').lead.item Aspen 2.0
           input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()').item
           button(ng-click='doSearch()').btn.btn-primary.item Search
+          a(href='/data/').btn.btn-default.item.hidden-xs Browse
 
     div.container.results
 
-      p {{ results.count }} items found.
+      div(ng-if='results')
+        p {{ results.count }} items found.
 
       div.result(ng-repeat='item in results.items')
         a(href='{{ item.url }}').title {{ item.title }}
         p(ng-bind-html='item.snippet').snippet
 
-      // XXXXXX
-      pre
-        | 1 hit: “revenge, ever attractive”
-        | 3 hits:  "pit in which Western civilization might be fatally engulfed"
-        | 90 hits: “western civilization”
-        | 4 hits: “poker on the ride”
-        | 4 hits: mayor of liepaja
+    div.container
+      div.well
+        strong Examples:
+        br
+        | Must contain "chartwell" and either "jock" or "sarah": &nbsp;
+        code chartwell (jock OR sarah)
+        br
+        | Must contain "soviets" but not "britain": &nbsp;
+        code soviets -britain
+        br
+        | Must contain the exact phrase, "i would drink it": &nbsp;
+        code "i would drink it"
+        br
+        em Note:
+        | Capitalization doesn't count except for &nbsp;
+        code OR

@@ -8,7 +8,7 @@
   },
   "author": "Ian Langworth",
   "license": "MIT",
-  "engines" : {
+  "engines": {
     "node": ">=0.10.3"
   },
   "dependencies": {
@@ -25,6 +25,7 @@
     "nodemon": "^1.2.1",
     "promise": "^5.0.0",
     "request": "^2.40.0",
+    "serve-index": "^1.1.6",
     "walk": "^2.3.3"
   }
 }

@@ -8,6 +8,7 @@ less = require 'less-middleware'
 logger = require 'morgan'
 request = require 'request'
 pathlib = require 'path'
+serveIndex = require 'serve-index'
 
 require './localenv'
 
@@ -21,7 +22,6 @@ app.use bodyParser.json()
 app.use bodyParser.urlencoded(extended: true)
 app.use less(pathlib.join(__dirname, 'static'))
 app.use coffeeMiddleware(src: pathlib.join(__dirname, 'static'))
-app.use express.static(pathlib.join(__dirname, 'static'))
 
 app.get '/', (req, res) ->
   res.render 'index'
@@ -42,10 +42,13 @@ app.get '/query', (req, res) ->
       'hl.maxAnalyzedChars': MAX_DOCUMENT_CHARACTERS
       'hl.score.pivot': 2000
       defType: 'dismax'
-      pf: 'text'
+      pf: 'text' # Boost phrases.
       ps: 100
   request options, (err, result, body) ->
     res.json body
+
+app.use express.static(pathlib.join(__dirname, 'static'))
+app.use serveIndex(pathlib.join(__dirname, 'static'), icons: true)
 
 port = process.env.PORT ? 8080
 app.listen port, ->

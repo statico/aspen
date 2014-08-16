@@ -3,8 +3,8 @@ DATA_BASEURL = '/data'
 angular.module('aspen', ['ngSanitize'])
 
   .controller('SearchController',
-    ['$scope', '$http', '$sce', '$location', '$rootScope'
-      ($scope, $http, $sce, $location, $rootScope) ->
+    ['$scope', '$http', '$sce', '$document', '$location', '$rootScope'
+      ($scope, $http, $sce, $document, $location, $rootScope) ->
 
         throttle = do ->
           timer = null
@@ -17,6 +17,7 @@ angular.module('aspen', ['ngSanitize'])
 
         $scope.doSearch = ->
           $location.path $scope.query
+          $rootScope.title = "#{ $scope.query } - Aspen"
           $http.get('/query', params: q: $scope.query).success (data) ->
             $scope.results =
               count: data.response.numFound
@@ -37,5 +38,6 @@ angular.module('aspen', ['ngSanitize'])
         $scope.onLocationChange()
         $rootScope.$on '$locationChangeSuccess', $scope.onLocationChange
 
+        $rootScope.title = 'Aspen'
     ]
   )
