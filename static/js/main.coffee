@@ -1,43 +1,51 @@
 DATA_BASEURL = '/data'
+ITEMS_PER_PAGE = 10
 
-angular.module('aspen', ['ngSanitize'])
+throttle = do ->
+  timer = null
+  return (fn) ->
+    clearTimeout timer
+    timer = setTimeout fn, 400
+
+angular.module('aspen', ['ngSanitize', 'angularUtils.directives.dirPagination'])
 
   .controller('SearchController',
-    ['$scope', '$http', '$sce', '$document', '$location', '$rootScope'
-      ($scope, $http, $sce, $document, $location, $rootScope) ->
+    ['$scope', '$http', '$sce', '$window', '$document', '$location', '$rootScope'
+      ($scope, $http, $sce, $window, $document, $location, $rootScope) ->
 
-        throttle = do ->
-          timer = null
-          return (fn) ->
-            clearTimeout timer
-            timer = setTimeout fn, 400
+        $rootScope.title = 'Aspen'
+
+        $scope.itemsPerPage = ITEMS_PER_PAGE
+        $scope.results = null
+        $scope.totalItems = 0
+        $scope.currentPage = 1
+        $scope.totalPages = 0
 
         $scope.onSearchKeyDown = ->
           throttle $scope.doSearch
 
-        $scope.doSearch = ->
+        $scope.doSearch = (page=1) ->
+          $scope.currentPage = page
           $location.path $scope.query
           $rootScope.title = "#{ $scope.query } - Aspen"
-          $http.get('/query', params: q: $scope.query).success (data) ->
-            $scope.results =
-              count: data.response.numFound
-              items: []
+          $http.get('/query', params: { q: $scope.query, page: page - 1 }).success (data) ->
+            $scope.results = []
+            $scope.totalItems = data.response.numFound
+            $scope.totalPages = Math.floor(data.response.numFound / ITEMS_PER_PAGE)
             for obj in data.response.docs
               {id, url, title} = obj
-              $scope.results.items.push {
+              $scope.results.push {
                 id: id
                 url: "#{ DATA_BASEURL }/#{ url }"
                 title: title?[0] ? url
                 snippet: $sce.trustAsHtml(data.highlighting[id].text?.join ' ... ')
               }
+            $window.scrollTo 0, 0
 
         $scope.onLocationChange = ->
           if $scope.query = $location.path().substr 1
             $scope.doSearch()
-
         $scope.onLocationChange()
         $rootScope.$on '$locationChangeSuccess', $scope.onLocationChange
-
-        $rootScope.title = 'Aspen'
     ]
   )

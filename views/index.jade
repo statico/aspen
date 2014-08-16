@@ -5,6 +5,7 @@ html(ng-app="aspen")
     link(rel='stylesheet', href='/css/main.css')
     script(src='/js/angular-1.2.21/angular.js')
     script(src='/js/angular-1.2.21/angular-sanitize.js')
+    script(src='/js/angularUtils/directives/pagination/dirPagination.js')
     script(src='/js/main.js')
   body(ng-controller='SearchController')
 
@@ -17,14 +18,29 @@ html(ng-app="aspen")
           button(ng-click='doSearch()').btn.btn-primary.item Search
           a(href='/data/').btn.btn-default.item.hidden-xs Browse
 
-    div.container.results
+    div(ng-cloak).container
 
-      div(ng-if='results')
-        p {{ results.count }} items found.
+      p(ng-if='totalItems').text-success
+        | {{ totalItems }} results found.
+        | Page {{ currentPage }} of {{ totalPages }}.
 
-      div.result(ng-repeat='item in results.items')
-        a(href='{{ item.url }}').title {{ item.title }}
-        p(ng-bind-html='item.snippet').snippet
+      p(ng-if='query && !totalItems').text-danger
+        | No results found.
+
+    div(ng-cloak).container.results
+
+      div.result(dir-paginate='result in results | itemsPerPage: itemsPerPage',
+                 current-page='currentPage'
+                 total-items='totalItems')
+        a(href='{{ result.url }}').title {{ result.title }}
+        p(ng-bind-html='result.snippet').snippet
+
+    div(ng-cloak, ng-if='totalItems').container.text-center
+
+      dir-pagination-controls(
+        on-page-change='doSearch(newPageNumber)'
+        template-url='/js/angularUtils/directives/pagination/dirPagination.tpl.html'
+        )
 
     div.container
       div.well
@@ -39,6 +55,6 @@ html(ng-app="aspen")
         | Must contain the exact phrase, "i would drink it": &nbsp;
         code "i would drink it"
         br
-        em Note:
+        em Note: &nbsp;
         | Capitalization doesn't count except for &nbsp;
         code OR

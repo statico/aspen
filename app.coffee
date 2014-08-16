@@ -13,6 +13,7 @@ serveIndex = require 'serve-index'
 require './localenv'
 
 MAX_DOCUMENT_CHARACTERS = 4e6
+ITEMS_PER_PAGE = 10
 
 app = express()
 app.set 'views', pathlib.join(__dirname, 'views')
@@ -38,6 +39,8 @@ app.get '/query', (req, res) ->
     json: true
     qs:
       q: req.query.q
+      rows: ITEMS_PER_PAGE
+      start: Math.max(ITEMS_PER_PAGE * (Number(req.query.page) or 0), 0)
       fl: 'id,url,title'
       'hl': true
       'hl.fl': 'text'
