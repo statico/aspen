@@ -39,7 +39,7 @@ upload = (path, title, filetype, cb) ->
       commit: true
   req = request options, (err, res, body) ->
     return cb err if err
-    console.log "Uploaded '#{ title }' (#{ relpath })"
+    console.log "Uploaded #{ relpath } - \"#{ title }\""
     cb()
   form = req.form()
   form.append 'myfile', fs.createReadStream path
@@ -47,7 +47,7 @@ upload = (path, title, filetype, cb) ->
 addDocuments = ->
   return new Promise((fulfill, reject) ->
 
-    count = 0
+    promises = []
     walker = walk.walk BASEDIR, followLinks: true
 
     walker.on 'file', (root, stats, next) ->
@@ -61,24 +61,20 @@ addDocuments = ->
       # Old-school text files where the top line is like:
       # @@Addison, Home Front, p. 200
       if match = name.match /.txt$/i
-        lineReader.eachLine path, (line, last) ->
-          re = /^.*(@@|TITLE:\s+)/
-          return true unless re.test line
-          title = line.replace re, ''
-          upload path, title, 'text/plain', (err) ->
-            throw new Error(err) if err
-            next()
-          return false
+        promises.push Promise.denodeify(upload)(path, relpath, 'text/plain')
+        next()
 
       else
         console.log 'UNKNOWN FILE:', path
         next()
 
     walker.on 'end', ->
-      fulfill count
+      fulfill Promise.all(promises)
   )
 
 clear().then(commit)
   .then(addDocuments)
   .then ->
     console.log "Done."
+  .catch (err) ->
+    console.error "ERROR: #{ err }"

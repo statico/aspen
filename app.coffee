@@ -40,7 +40,10 @@ app.get '/query', (req, res) ->
       'hl.snippets': 3
       'hl.mergeContiguous': true
       'hl.maxAnalyzedChars': MAX_DOCUMENT_CHARACTERS
-      'hl.score.pivot': 700
+      'hl.score.pivot': 2000
+      defType: 'dismax'
+      pf: 'text'
+      ps: 100
   request options, (err, result, body) ->
     res.json body
 

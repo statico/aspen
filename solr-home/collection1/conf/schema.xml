@@ -151,7 +151,7 @@
   <field name="content" type="text_general" indexed="false" stored="true" multiValued="true"/>
   <!-- catchall field, containing all other searchable text fields (implemented
         via copyField further on in this schema  -->
-  <field name="text" type="text_en"
+  <field name="text" type="text_en_splitting"
     indexed="true" stored="true" multiValued="true"
     termVectors="true" termPositions="true" termOffsets="true"
     storeOffsetsWithPositions="true"

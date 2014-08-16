@@ -5,3 +5,4 @@ solr-dist
 solr-home/collection1/data
 solr-webapp
 static/data
+velocity.log
