@@ -20,16 +20,16 @@ This expects lots of content to be symlinked in `static/data`.
 
 - Dev solr start
 
-    $ npm run solr
+        $ npm run solr
 
 - Dev server
 
-    $ npm run dev
+        $ npm run dev
 
 - Manual file import
 
-    $ cd static/data/
-    $ x=path/to/file.pdf ; curl "http://localhost:8983/solr/update/extract?literal.id=$x&literal.url=$x&commit=true" -F "myfile=@$x"
+        $ cd static/data/
+        $ x=path/to/file.pdf ; curl "http://localhost:8983/solr/update/extract?literal.id=$x&literal.url=$x&commit=true" -F "myfile=@$x"
 
 ## Example Solr Query
 
