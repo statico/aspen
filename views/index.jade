@@ -32,8 +32,10 @@ html(ng-app="aspen")
       div.result(dir-paginate='result in results | itemsPerPage: itemsPerPage',
                  current-page='currentPage'
                  total-items='totalItems')
-        a(href='{{ result.url }}').title {{ result.title }}
-        small.text-muted &nbsp; {{ result.url }}
+        a(href='{{ result.url }}')
+          span.title {{ result.title }}
+          | &nbsp;
+          small.text-muted {{ result.url }}
         br
         p(ng-bind-html='result.snippet').snippet
 
