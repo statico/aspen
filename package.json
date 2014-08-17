@@ -2,6 +2,7 @@
   "name": "aspen",
   "version": "0.0.1",
   "description": "Private search engine for historical documents",
+  "repository": "git@github.com:statico/aspen.git",
   "scripts": {
     "dev": "nodemon -e coffee -x coffee -w app.coffee app.coffee",
     "solr": "java -Dsolr.solr.home=solr-home -Djetty.home=solr-dist/example -server -jar solr-dist/example/start.jar"
