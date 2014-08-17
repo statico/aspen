@@ -22,6 +22,7 @@ angular.module('aspen', ['ngSanitize', 'angularUtils.directives.dirPagination'])
         $scope.totalItems = 0
         $scope.currentPage = 1
         $scope.totalPages = 0
+        $scope.error = null
 
         $scope.onSearchKeyDown = ->
           throttle $scope.doSearch
@@ -31,6 +32,10 @@ angular.module('aspen', ['ngSanitize', 'angularUtils.directives.dirPagination'])
           $location.path $scope.query
           $rootScope.title = "#{ $scope.query } - Aspen"
           $http.get('/query', params: { q: $scope.query, page: page - 1 }).success (data) ->
+            if not data.response?.numFound?
+              $scope.error = JSON.stringify data, null, '  '
+              return
+            $scope.error = null
             $scope.results = []
             $scope.totalItems = data.response.numFound
             $scope.totalPages = Math.floor(data.response.numFound / ITEMS_PER_PAGE)

@@ -55,7 +55,10 @@ app.get '/query', (req, res) ->
       ps: 100
       bq: 'url:*pdf^5' # Boost PDF documents (whcih are newer & higher quality)
   request options, (err, result, body) ->
-    res.json body
+    if err
+      res.json { error: err }
+    else
+      res.json body
 
 app.use express.static(pathlib.join(__dirname, 'static'))
 app.use serveIndex(pathlib.join(__dirname, 'static'), icons: true)

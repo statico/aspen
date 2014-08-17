@@ -20,6 +20,10 @@ html(ng-app="aspen")
 
     div(ng-cloak).container
 
+      div(ng-if='error != null').alert.alert-danger
+        p: strong An error occurred -- you should tell Ian:
+        p.json {{ error }}
+
       p(ng-if='totalItems').text-success
         | {{ totalItems }} results found.
         | Page {{ currentPage }} of {{ totalPages }}.
