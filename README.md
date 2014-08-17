@@ -20,11 +20,11 @@ This expects lots of content to be symlinked in `static/data`.
 
 - Dev solr start
 
-        $ npm run solr
+        $ npm run solr-dev
 
 - Dev server
 
-        $ npm run dev
+        $ npm run web-dev
 
 - Manual file import
 
