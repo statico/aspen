@@ -20,15 +20,15 @@ html(ng-app="aspen")
 
     div(ng-cloak).container
 
-      div(ng-if='error != null').alert.alert-danger
+      div(ng-show='error != null').alert.alert-danger
         p: strong An error occurred -- you should tell Ian:
         p.json {{ error }}
 
-      p(ng-if='totalItems').text-success
+      p(ng-show='totalItems').text-success
         | {{ totalItems }} results found.
         | Page {{ currentPage }} of {{ totalPages }}.
 
-      p(ng-if='query && !totalItems').text-danger
+      p(ng-show='query && !totalItems').text-danger
         | 0 results found.
 
     div(ng-cloak).container.results
@@ -43,7 +43,7 @@ html(ng-app="aspen")
         br
         p(ng-bind-html='result.snippet').snippet
 
-    div(ng-cloak, ng-if='totalItems').container.text-center
+    div(ng-cloak, ng-show='totalItems').container.text-center
 
       dir-pagination-controls(
         on-page-change='doSearch(newPageNumber)'
