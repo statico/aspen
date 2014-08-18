@@ -15,7 +15,9 @@ html(ng-app="aspen")
           img(src='wsc.jpg').wsc.item
           label(for='query').lead.item Aspen 2.0
           input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()', autofocus).item
-          button(ng-click='doSearch()').btn.btn-primary.item Search
+          button(ng-click='doSearch()').btn.btn-primary.item
+            span(ng-hide='inProgress') Search
+            img(ng-show='inProgress', src='/spinner.gif').spinner
           a(href='/data/').btn.btn-default.item.hidden-xs Browse
 
     div(ng-cloak).container
@@ -28,7 +30,7 @@ html(ng-app="aspen")
         | {{ totalItems }} results found.
         | Page {{ currentPage }} of {{ totalPages }}.
 
-      p(ng-show='query && !totalItems').text-danger
+      p(ng-show='results !== null && query && !totalItems').text-danger
         | 0 results found.
 
     div(ng-cloak).container.results
