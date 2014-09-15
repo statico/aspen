@@ -15,7 +15,7 @@ html(ng-app="aspen")
           img(src='wsc.jpg').wsc.item
           label(for='query').lead.item Aspen 2.0
           input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()', autofocus).item
-          button(ng-click='doSearch()').btn.btn-primary.item
+          button(ng-click='onSearchButtonClicked()').btn.btn-primary.item
             span(ng-hide='inProgress') Search
             img(ng-show='inProgress', src='/spinner.gif').spinner
           a(href='/data/').btn.btn-default.item.hidden-xs Browse

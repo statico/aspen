@@ -26,16 +26,21 @@ angular.module('aspen', ['ngSanitize', 'angularUtils.directives.dirPagination'])
         $scope.error = null
 
         $scope.onSearchKeyDown = ->
-          throttle $scope.doSearch
+          throttle ->
+            $scope.currentPage = 1
+            $scope.doSearch()
 
-        $scope.doSearch = (page=1) ->
+        $scope.onSearchButtonClicked = ->
+          $scope.currentPage = 1
+          $scope.doSearch()
+
+        $scope.doSearch = ->
           $scope.inProgress = true
-          $scope.currentPage = page
-          $location.path $scope.query
+          $location.search { q: $scope.query, p: $scope.currentPage }
 
           $rootScope.title = "#{ $scope.query } - Aspen"
 
-          $http.get('/query', params: { q: $scope.query, page: page - 1 }).success (data) ->
+          $http.get('/query', params: { q: $scope.query, page: $scope.currentPage - 1 }).success (data) ->
             $scope.inProgress = false
 
             if not data.response?.numFound?
@@ -59,7 +64,10 @@ angular.module('aspen', ['ngSanitize', 'angularUtils.directives.dirPagination'])
             $window.scrollTo 0, 0
 
         $scope.onLocationChange = ->
-          if $scope.query = $location.path().substr 1
+          search = $location.search()
+          if search.q?
+            $scope.query = search.q
+            $scope.currentPage = Number(search.p) or 1
             $scope.doSearch()
         $scope.onLocationChange()
         $rootScope.$on '$locationChangeSuccess', $scope.onLocationChange
