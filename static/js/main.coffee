@@ -36,7 +36,10 @@ angular.module('aspen', ['ngSanitize', 'angularUtils.directives.dirPagination'])
 
         $scope.doSearch = ->
           $scope.inProgress = true
-          $location.search { q: $scope.query, p: $scope.currentPage }
+          $location.search {
+            q: $scope.query
+            p: if $scope.currentPage is 1 then null else $scope.currentPage
+          }
 
           $rootScope.title = "#{ $scope.query } - Aspen"
 
