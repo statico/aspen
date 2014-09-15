@@ -53,7 +53,7 @@ app.get '/query', (req, res) ->
       defType: 'edismax'
       pf: 'text' # Boost phrases.
       ps: 100
-      bq: 'url:*pdf^5' # Boost PDF documents (whcih are newer & higher quality)
+      bq: 'url:*pdf^5 url:*docx^5' # Boost newer scans.
   request options, (err, result, body) ->
     if err
       res.json { error: err }
