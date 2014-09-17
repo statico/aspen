@@ -10,6 +10,7 @@ lineReader = require 'line-reader'
 require './localenv'
 
 BASEDIR = pathlib.join(__dirname, 'static/data')
+META_SUFFIX = '-META.json'
 
 subdir = process.argv[2] ? '.'
 

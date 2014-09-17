@@ -6,10 +6,12 @@ This expects lots of content to be symlinked in `static/data`.
 
 ## Getting Started
 
+    $ npm install -g bower
     $ npm install
+    $ bower install
     $ ln -s ../solr-4.9.0 solr-dist
     $ ln -s ../data static/data
-    $ npm run solr &
+    $ npm run solr-dev &
     $ ./import.coffee
 
 ## Notes
@@ -20,16 +22,16 @@ This expects lots of content to be symlinked in `static/data`.
 
 - Dev solr start
 
-        $ npm run solr-dev
+    $ npm run solr-dev
 
 - Dev server
 
-        $ npm run web-dev
+    $ npm run web-dev
 
 - Manual file import
 
-        $ cd static/data/
-        $ x=path/to/file.pdf ; curl "http://localhost:8983/solr/update/extract?literal.id=$x&literal.url=$x&commit=true" -F "myfile=@$x"
+    $ cd static/data/
+    $ x=path/to/file.pdf ; curl "http://localhost:8983/solr/update/extract?literal.id=$x&literal.url=$x&commit=true" -F "myfile=@$x"
 
 ## Example Solr Query
 

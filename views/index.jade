@@ -1,18 +1,21 @@
 doctype html
-html(ng-app="aspen")
+html(ng-app='aspen')
   head
     title(ng-bind='title') Aspen
-    link(rel='stylesheet', href='/css/main.css')
-    script(src='/js/angular-1.2.21/angular.js')
-    script(src='/js/angular-1.2.21/angular-sanitize.js')
-    script(src='/js/angularUtils/directives/pagination/dirPagination.js')
-    script(src='/js/main.js')
-  body(ng-controller='SearchController')
 
-    div.topnav
+    // Begin Bower Stylesheets
+    link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/bower_components/viewer/dist/crocodoc.viewer.min.css')
+    // End Bower Stylesheets
+
+    link(rel='stylesheet', href='/main.css')
+
+  body
+
+    div.topnav(ng-cloak, ng-controller='InputController')
       div.container
         form
-          img(src='wsc.jpg').wsc.item
+          a(href="/"): img(src='wsc.jpg').wsc.item
           label(for='query').lead.item Aspen 2.0
           input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()', autofocus).item
           button(ng-click='onSearchButtonClicked()').btn.btn-primary.item
@@ -20,7 +23,15 @@ html(ng-app="aspen")
             img(ng-show='inProgress', src='/spinner.gif').spinner
           a(href='/data/').btn.btn-default.item.hidden-xs Browse
 
-    div(ng-cloak).container
+    div.ng-view
+
+  script(type='text/ng-template', id='blank.html')
+
+    div(ng-include='"footer.html"')
+
+  script(type='text/ng-template', id='results.html')
+
+    div.container
 
       div(ng-show='error != null').alert.alert-danger
         p: strong An error occurred -- you should tell Ian:
@@ -30,27 +41,46 @@ html(ng-app="aspen")
         | {{ totalItems }} results found.
         | Page {{ currentPage }} of {{ totalPages }}.
 
-      p(ng-show='results !== null && query && !totalItems').text-danger
+      p(ng-show='!totalItems').text-danger
         | 0 results found.
 
-    div(ng-cloak).container.results
+    div.container.results
 
       div.result(dir-paginate='result in results | itemsPerPage: itemsPerPage',
-                 current-page='currentPage'
-                 total-items='totalItems')
-        a(href='{{ result.url }}')
+                current-page='currentPage'
+                total-items='totalItems')
+        a(ng-click='onResultClick(result)')
           span.title {{ result.title }}
           | &nbsp;
           small.text-muted {{ result.url }}
         br
         p(ng-bind-html='result.snippet').snippet
 
-    div(ng-cloak, ng-show='totalItems').container.text-center
+    div.container.text-center
 
       dir-pagination-controls(
         on-page-change='doSearch(newPageNumber)'
-        template-url='/js/angularUtils/directives/pagination/dirPagination.tpl.html'
+        template-url='/bower_components/angular-utils-pagination/dirPagination.tpl.html'
         )
+
+  script(type='text/ng-template', id='view.html')
+
+    div.container(ng-if='!ready')
+      p.text-center: img(src='/big-spinner.gif')
+
+    div.container(ng-if='ready')
+
+      div(ng-show='error != null').alert.alert-danger
+        p: strong An error occurred -- you should tell Ian:
+        p.json {{ error }}
+
+      div(ng-if='metadata.boxview',
+        box-document-viewer="{{ metadata.boxview.urls.assets }}")
+
+      div(ng-if='!metadata')
+        iframe(ng-src='url')
+
+  script(type='text/ng-template', id='footer.html')
 
     div.container
       div.well
@@ -67,3 +97,15 @@ html(ng-app="aspen")
         br
         em Note: &nbsp;
         | Capitalization doesn't count except for <code>AND</code> and <code>OR</code>
+
+  // Begin Bower JavaScript
+  script(src='/bower_components/jquery/dist/jquery.min.js')
+  script(src='/bower_components/angular/angular.js')
+  script(src='/bower_components/angular-route/angular-route.js')
+  script(src='/bower_components/angular-sanitize/angular-sanitize.js')
+  script(src='/bower_components/angular-utils-pagination/dirPagination.js')
+  script(src='/bower_components/viewer/dist/crocodoc.viewer.min.js')
+  // End Bower JavaScript
+
+  script(src='/main.js')
+
