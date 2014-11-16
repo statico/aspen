@@ -12,7 +12,7 @@ This expects lots of content to be symlinked in `static/data`.
     $ ln -s ../solr-4.9.0 solr-dist
     $ ln -s ../data static/data
     $ npm run solr-dev &
-    $ ./import.coffee
+    $ ./import.coffee solr
 
 ## Notes
 

@@ -12,7 +12,7 @@ request = require 'request'
 pathlib = require 'path'
 serveIndex = require 'serve-index'
 
-require './localenv'
+require('./lib/localenv').init __dirname
 
 MAX_DOCUMENT_CHARACTERS = 4e6
 ITEMS_PER_PAGE = 10

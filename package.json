@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Private search engine for historical documents",
   "repository": "git@github.com:statico/aspen.git",
+  "private": true,
   "scripts": {
     "web-dev": "nodemon -e coffee -x coffee -w app.coffee app.coffee",
     "solr-dev": "java -Dsolr.solr.home=solr-home -Djetty.home=solr-dist/example -server -jar solr-dist/example/start.jar",
@@ -12,13 +13,14 @@
   "author": "Ian Langworth",
   "license": "MIT",
   "engines": {
-    "node": ">=0.10.3"
+    "node": ">=0.10"
   },
   "dependencies": {
     "body-parser": "^1.6.2",
     "browserify": "^5.9.1",
     "coffee-middleware": "^0.2.1",
     "coffee-script": "^1.7.1",
+    "commander": "^2.5.0",
     "express": "^4.8.2",
     "forever": "^0.11.1",
     "jade": "^1.5.0",
@@ -26,7 +28,6 @@
     "line-reader": "^0.2.4",
     "morgan": "^1.2.2",
     "nodemon": "^1.2.1",
-    "promise": "^5.0.0",
     "request": "^2.40.0",
     "serve-index": "^1.1.6",
     "walk": "^2.3.3"
