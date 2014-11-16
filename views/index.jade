@@ -10,30 +10,20 @@ html(ng-app='aspen')
 
     link(rel='stylesheet', href='/main.css')
 
-  body
+  body(ng-cloak, ng-controller='MainController')
 
-    div.topnav(ng-cloak, ng-controller='InputController')
+    div.topnav
       div.container
         form
           a(href="/"): img(src='wsc.jpg').wsc.item
           label(for='query').lead.item Aspen 2.0
           input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()', autofocus).item
-          button(ng-click='onSearchButtonClicked()').btn.btn-primary.item
-            span(ng-hide='inProgress') Search
-            img(ng-show='inProgress', src='/spinner.gif').spinner
+          button(ng-click='onSearchButtonClicked()').btn.btn-primary.item Search
           a(href='/data/').btn.btn-default.item.hidden-xs Browse
 
-    div.ng-view
+    div(ng-show='query').container
 
-  script(type='text/ng-template', id='blank.html')
-
-    div(ng-include='"footer.html"')
-
-  script(type='text/ng-template', id='results.html')
-
-    div.container
-
-      div(ng-show='error != null').alert.alert-danger
+      div(ng-show='error != null && !inProgress').alert.alert-danger
         p: strong An error occurred -- you should tell Ian:
         p.json {{ error }}
 
@@ -41,10 +31,10 @@ html(ng-app='aspen')
         | {{ totalItems }} results found.
         | Page {{ currentPage }} of {{ totalPages }}.
 
-      p(ng-show='!totalItems').text-danger
+      p(ng-show='!totalItems && !inProgress').text-danger
         | 0 results found.
 
-    div.container.results
+    div(ng-show='results && results.length').container.results
 
       div.result(dir-paginate='result in results | itemsPerPage: itemsPerPage',
                 current-page='currentPage'
@@ -62,25 +52,6 @@ html(ng-app='aspen')
         on-page-change='doSearch(newPageNumber)'
         template-url='/bower_components/angular-utils-pagination/dirPagination.tpl.html'
         )
-
-  script(type='text/ng-template', id='view.html')
-
-    div.container(ng-if='!ready')
-      p.text-center: img(src='/big-spinner.gif')
-
-    div.container(ng-if='ready')
-
-      div(ng-show='error != null').alert.alert-danger
-        p: strong An error occurred -- you should tell Ian:
-        p.json {{ error }}
-
-      div(ng-if='metadata.boxview',
-        box-document-viewer="{{ metadata.boxview.urls.assets }}")
-
-      div(ng-if='!metadata')
-        iframe(ng-src='url')
-
-  script(type='text/ng-template', id='footer.html')
 
     div.container
       div.well

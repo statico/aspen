@@ -47,97 +47,96 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
         element.on '$destroy', -> viewer.destroy()
     }
 
-  .controller 'InputController', (utils, $scope, $rootScope, $routeParams) ->
-
-    $scope.query = ''
-
-    $rootScope.$on '$routeChangeSuccess', ->
-      $scope.query = $routeParams.query
-
-    $scope.onSearchKeyDown = ->
-      utils.throttle 400, ->
-        $scope.$apply ->
-          $rootScope.$broadcast 'queryUpdated', $scope.query
-
-    $scope.onSearchButtonClicked = ->
-      utils.cancelPendingThrottle()
-      $rootScope.$broadcast 'queryUpdated', $scope.query
-
-  .controller 'SearchResultsController', (server, utils, $scope, $sce, $routeParams, $window, $rootScope) ->
+  .controller 'MainController', (server, utils, $rootScope, $scope, $sce, $location, $window) ->
 
     $scope.itemsPerPage = ITEMS_PER_PAGE
     $scope.results = null
     $scope.totalItems = 0
     $scope.totalPages = 0
-    $scope.error = null
-    $scope.query = $routeParams.query
-    $scope.currentPage = Number($routeParams.page) or 1
+    $scope.inProgress = false
 
-    utils.setTitle "#{ $scope.query } - Aspen"
+    updateScopeFromLocation = ->
+      $scope.query = $location.search().q or ''
+      $scope.currentPage = Number($location.search().p) or 1
+    updateScopeFromLocation()
+
+    updateTitle = ->
+      if $scope.query
+        utils.setTitle "#{ $scope.query } - Aspen"
+      else
+        utils.setTitle 'Aspen'
+    updateTitle()
+
+    # URL interaction
+
+    oldState = null
+    $rootScope.$on '$locationChangeSuccess', ->
+      newState = JSON.stringify $location.search()
+      if newState != oldState
+        updateScopeFromLocation()
+        doSearch()
+        oldState = newState
+
+    # Search field interaction
+
+    $scope.onSearchKeyDown = ->
+      utils.throttle 400, ->
+        $scope.$apply ->
+          $scope.currentPage = 1
+          doSearch()
+
+    $scope.onSearchButtonClicked = ->
+      utils.cancelPendingThrottle()
+      $scope.currentPage = 1
+      doSearch()
+
+    # Pagination interaction
 
     $scope.$watch 'currentPage', ->
-      $rootScope.$broadcast 'queryUpdated', $scope.query, $scope.currentPage
+      doSearch()
 
-    $scope.onResultClick = (result) ->
-      $rootScope.$broadcast 'documentRequested', $scope.query, result.url
+    # Fetching results
 
-    server.query $scope.query, $scope.currentPage, (err, data) ->
-      if err
-        $scope.error = err
-        return
+    doSearch = ->
+      $scope.inProgress = true
 
-      $scope.error = null
-      $scope.results = []
-      $scope.totalItems = data.response.numFound
-      $scope.totalPages = Math.floor(data.response.numFound / ITEMS_PER_PAGE)
+      server.query $scope.query, $scope.currentPage, (err, data) ->
+        updateTitle()
+        $scope.inProgress = false
+        $location.search
+          q: $scope.query
+          p: if Number($scope.currentPage) is 1 then null else $scope.currentPage
+          f: null
 
-      for obj in data.response.docs
-        {id, url, title} = obj
-        $scope.results.push {
-          id: id
-          url: "#{ DATA_BASEURL }/#{ url }"
-          title: title?[0] ? url
-          snippet: $sce.trustAsHtml(data.highlighting[id].text?.join ' ... ')
-        }
+        if err
+          $scope.error = err
+          return
 
-      $window.scrollTo 0, 0
+        $scope.error = null
+        $scope.results = []
+        $scope.totalItems = data.response.numFound
+        $scope.totalPages = Math.floor(data.response.numFound / ITEMS_PER_PAGE)
 
-  .controller 'DocumentViewerController', (server, $scope, $routeParams) ->
-    $scope.query = decodeURIComponent $routeParams.query
-    $scope.url = decodeURIComponent $routeParams.url
-    $scope.ready = false
+        for obj in data.response.docs
+          {id, url, title} = obj
+          $scope.results.push {
+            id: id
+            url: "#{ DATA_BASEURL }/#{ url }"
+            title: title?[0] ? url
+            snippet: $sce.trustAsHtml(data.highlighting[id].text?.join ' ... ')
+          }
 
-    server.metadata $scope.url, (err, data) ->
-      $scope.ready = true
-      $scope.error = err
-      $scope.metadata = data
+        $window.scrollTo 0, 0
 
-  .config ($routeProvider, $locationProvider) ->
+    doSearch()
 
-    $routeProvider
-      .when('/', {
-        templateUrl: 'blank.html'
-      })
-      .when('/search/:query/:page?', {
-        templateUrl: 'results.html'
-        controller: 'SearchResultsController'
-      })
-      .when('/view/:query/:url', {
-        templateUrl: 'view.html'
-        controller: 'DocumentViewerController'
-      })
-      .otherwise({
-        redirectTo: '/'
-      })
+  #.controller 'DocumentViewerController', (server, $scope, $routeParams) ->
+    #$scope.query = decodeURIComponent $routeParams.query
+    #$scope.url = decodeURIComponent $routeParams.url
+    #$scope.ready = false
 
-  .run (utils, $rootScope, $location) ->
-    utils.setTitle 'Aspen'
+    #server.metadata $scope.url, (err, data) ->
+      #$scope.ready = true
+      #$scope.error = err
+      #$scope.metadata = data
 
-    $rootScope.$on 'queryUpdated', (_, query, page=1) ->
-      if Number(page) is 1
-        $location.path "/search/#{ query }"
-      else
-        $location.path "/search/#{ query }/#{ page }"
-
-    $rootScope.$on 'documentRequested', (_, query, url) ->
-      $location.path "/view/#{ encodeURIComponent query }/#{ encodeURIComponent url }"

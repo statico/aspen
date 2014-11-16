@@ -33,8 +33,8 @@ app.locals.pretty = true
 
 app.get '/', (req, res) ->
   if req.query.q
-    # Legacy redirect.
-    res.redirect "/#/#{ encodeURIComponent req.query.q }"
+    # Legacy redirect from Aspen 1.0.
+    res.redirect "/#/search/#{ encodeURIComponent req.query.q }"
   else
     res.render 'index'
 
