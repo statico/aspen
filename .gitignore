@@ -2,6 +2,7 @@ bower_components
 env
 logs
 node_modules
+npm-debug.log
 solr-dist
 solr-home/collection1/data
 solr-webapp

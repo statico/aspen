@@ -8,7 +8,9 @@
     "web-dev": "nodemon -e coffee -x coffee -w app.coffee app.coffee",
     "solr-dev": "java -Dsolr.solr.home=solr-home -Djetty.home=solr-dist/example -server -jar solr-dist/example/start.jar",
     "web-prod": "NODE_ENV=production coffee app.coffee",
-    "solr-prod": "java -Dsolr.solr.home=solr-home -Djetty.home=solr-dist/example -Xms300m -Xmx600m -server -jar solr-dist/example/start.jar"
+    "solr-prod": "java -Dsolr.solr.home=solr-home -Djetty.home=solr-dist/example -Xms300m -Xmx600m -server -jar solr-dist/example/start.jar",
+    "syncup": "rsync -azv -e ssh --delete --progress static/data/ lemon:wsc/data/",
+    "syncdown": "rsync -azv -e ssh --delete --progress lemon:wsc/data/ static/data/"
   },
   "author": "Ian Langworth",
   "license": "MIT",
@@ -23,6 +25,7 @@
     "commander": "^2.5.0",
     "express": "^4.8.2",
     "forever": "^0.11.1",
+    "function-rate-limit": "0.0.1",
     "jade": "^1.5.0",
     "less-middleware": "^1.0.3",
     "line-reader": "^0.2.4",

@@ -13,11 +13,18 @@ solrPost = exports.solrPost = (body, cb) ->
     headers: { 'Content-type': 'text/xml; charset=utf-8' }
   }, cb
 
-solrClear = exports.solrClear = (cb) ->
-  solrPost '<delete><query>*:*</query></delete>', cb
-
 solrCommit = exports.solrCommit = (cb) ->
   solrPost '<commit/>', cb
+
+solrClearQuery = exports.solrClearQuery = (query, cb) ->
+  solrPost "<delete><query>id:#{ query }</query></delete>", (err, res, body) ->
+    return cb err if err
+    solrCommit cb
+
+solrClearAll = exports.solrClearAll = (cb) ->
+  solrPost '<delete><query>*:*</query></delete>', (err, res, body) ->
+    return cb err if err
+    solrCommit cb
 
 solrUpload = exports.solrUpload = (basedir, fullpath, title, cb) ->
   relpath = pathlib.relative basedir, fullpath

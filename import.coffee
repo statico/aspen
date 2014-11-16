@@ -3,11 +3,12 @@
 colors = require 'colors'
 commander = require 'commander'
 pathlib = require 'path'
+rateLimit = require 'function-rate-limit'
 
 require('./lib/localenv').init __dirname
 
 {boxViewUpload} = require './lib/boxview'
-{solrUpload} = require './lib/solr'
+{solrUpload, solrClearAll, solrClearQuery} = require './lib/solr'
 {walk} = require './lib/walker'
 {extractTitle} = require './lib/plaintext'
 
@@ -20,7 +21,7 @@ commander
   .description('Index static/data/ (or a subdir) into Solr')
   .action (subdir) ->
     {basedir} = commander
-    walk basedir, subdir, (relpath, fullpath, richtext) ->
+    cb = ratelimit 3, 1000, (relpath, fullpath, richtext) ->
       if richtext
         solrUpload basedir, fullpath, null, (err) ->
           if err
@@ -34,6 +35,21 @@ commander
               console.error "✗ ".red, err
             else
               console.log "✓ ".green, "#{ relpath } -> plaintext, title='#{ title }'"
+    walk basedir, subdir, cb
+
+commander
+  .command('clear <query>')
+  .description('Clears some documents from Solr, like "RML/*"')
+  .action (query) ->
+    solrClearQuery query, (err, res, body) ->
+      console.log "✓ ".green, "Done."
+
+commander
+  .command('clearall')
+  .description('Empty the Solr database')
+  .action ->
+    solrClearAll ->
+      console.log "✓ ".green, "Done."
 
 commander
   .command('boxview [subdir]')
@@ -47,14 +63,6 @@ commander
           console.error "✗ ".red, err
         else
           console.log "✓ ".green, relpath
-
-commander
-  .command('clearall')
-  .description('Empty the Solr database')
-  .action ->
-    solrClear ->
-      solrCommit ->
-        console.log "✓ ".green, "Done."
 
 commander
   .command('*')
