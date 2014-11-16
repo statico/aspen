@@ -17,7 +17,7 @@ html(ng-app='aspen')
         form
           a(href="/"): img(src='wsc.jpg').wsc.item
           label(for='query').lead.item Aspen 2.0
-          input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()', autofocus).item
+          input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()', focus-if="!filename").item
           button(ng-click='onSearchButtonClicked()').btn.btn-primary.item Search
           a(href='/data/').btn.btn-default.item.hidden-xs Browse
 
@@ -68,6 +68,10 @@ html(ng-app='aspen')
         br
         em Note: &nbsp;
         | Capitalization doesn't count except for <code>AND</code> and <code>OR</code>
+
+    //div(ng-if='filename', focus-if="filename", ng-click="hideViewer()")#viewer
+    //div(ng-if='fileBoxViewURL').inline: div(box-document-viewer='fileBoxViewURL')
+    //iframe(ng-if='fileIframeURL', ng-src="{{ fileIframeURL }}").inline
 
   // Begin Bower JavaScript
   script(src='/bower_components/jquery/dist/jquery.min.js')

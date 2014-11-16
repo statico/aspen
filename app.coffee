@@ -14,6 +14,8 @@ serveIndex = require 'serve-index'
 
 require('./lib/localenv').init __dirname
 
+{getMeta} = require './lib/meta'
+
 MAX_DOCUMENT_CHARACTERS = 4e6
 ITEMS_PER_PAGE = 10
 STATIC_BASEDIR = pathlib.join(__dirname, 'static')
@@ -70,12 +72,9 @@ app.get '/query', (req, res) ->
 app.get '/metadata', (req, res) ->
   return res.send(400) if /\.\.|\0/.test req.query.path
 
-  path = pathlib.join STATIC_BASEDIR, req.query.path + META_SUFFIX
-  return res.json({}) unless fs.existsSync path
+  metadata = getMeta pathlib.join(STATIC_BASEDIR, req.query.path)
 
-  metadata = JSON.parse fs.readFileSync path
-
-  if metadata.boxview
+  if metadata?.boxview
     options =
       method: 'POST'
       url: BOX_VIEW_BASEURL + '/sessions'
@@ -91,7 +90,7 @@ app.get '/metadata', (req, res) ->
         res.json { boxview: body }
 
   else
-    return res.send(501)
+    return res.json { error: "No metadata" }
 
 # ---------------------------------------------------------------------------
 
