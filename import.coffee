@@ -1,9 +1,9 @@
 #!./node_modules/coffee-script/bin/coffee
 
+async = require 'async'
 colors = require 'colors'
 commander = require 'commander'
 pathlib = require 'path'
-rateLimit = require 'function-rate-limit'
 
 require('./lib/localenv').init __dirname
 
@@ -15,20 +15,22 @@ require('./lib/localenv').init __dirname
 commander
   .version('0.0.1')
   .option('-d, --basedir <path>', 'Set the path to static/data/', __dirname + '/static/data')
-  .option('-l, --limit <n>', 'Limit solr indexing to this many docs per second', 999)
+  .option('-c, --concurrency <n>', 'Limit solr indexing to this many docs at once', Infinity)
 
 commander
   .command('solr [subdirs...]')
   .description('Index static/data/ (or a subdir) into Solr')
   .action (subdirs) ->
-    {basedir, limit} = commander
-    cb = rateLimit limit, 1000, (relpath, fullpath, richtext) ->
+    {basedir, concurrency} = commander
+
+    indexfn = ({relpath, fullpath, richtext}, done) ->
       if richtext
         solrUpload basedir, fullpath, null, (err) ->
           if err
             console.error "✗ ".red, err
           else
             console.log "✓ ".green, "#{ relpath } -> rich text"
+          done()
       else
         extractTitle fullpath, (title) ->
           solrUpload basedir, fullpath, title, (err) ->
@@ -36,11 +38,19 @@ commander
               console.error "✗ ".red, err
             else
               console.log "✓ ".green, "#{ relpath } -> plaintext, title='#{ title }'"
+          done()
+
+    queue = async.queue indexfn, concurrency
+
+    walkfn = (relpath, fullpath, richtext) ->
+      queue.push {relpath: relpath, fullpath: fullpath, richtext: richtext}, (err) ->
+        console.error "Couldn't push to queue: #{ err }".red if err
+
     if subdirs.length
       for dir in subdirs
-        walk basedir, dir, cb
+        walk basedir, dir, walkfn
     else
-      walk basedir, cb
+      walk basedir, walkfn
 
 commander
   .command('clear <query>')
