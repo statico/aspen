@@ -54,14 +54,10 @@ app.get '/query', (req, res) ->
       start: Math.max(ITEMS_PER_PAGE * (Number(req.query.page) or 0), 0)
       fl: 'id,url,title'
       'hl': true
-      'hl.fl': 'text'
       'hl.snippets': 3
-      'hl.mergeContiguous': true
+      'hl.fragsize': 0
       'hl.maxAnalyzedChars': MAX_DOCUMENT_CHARACTERS
-      'hl.score.pivot': 2000
-      defType: 'edismax'
       pf: 'text' # Boost phrases.
-      ps: 100
       bq: 'url:*pdf^5 url:*docx^5' # Boost newer scans.
 
   respond = (content) -> res.json content
