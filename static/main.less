@@ -1,8 +1,12 @@
+@import "../bower_components/bootstrap/less/variables.less";
+
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
 }
 
 body {
+  background: #fafafa;
+  color: #111;
   font-family: Georgia;
   font-size: 16px;
 }
@@ -10,10 +14,6 @@ body {
 a {
   cursor: pointer;
   color: #00e;
-}
-
-img.wsc {
-  height: 50px;
 }
 
 .topnav {
@@ -27,6 +27,30 @@ img.wsc {
     width: 60%;
     padding: 5px 7px;
   }
+  img.wsc {
+    height: 50px;
+  }
+}
+@media (max-width: @screen-lg-min) {
+  .topnav {
+    input[type=text] {
+      width: 40%;
+    }
+  }
+}
+@media (max-width: @screen-xs-max) {
+  .topnav {
+    padding: 0.5em 0;
+    input[type=text] {
+      width: 60%;
+    }
+    .item {
+      margin-right: 0.5em;
+    }
+    img.wsc {
+      height: 2em;
+    }
+  }
 }
 
 .results {
@@ -36,7 +60,7 @@ img.wsc {
       font-weight: bold;
     }
     .snippet em {
-      color: #c00;
+      color: #b00;
       font-weight: bold;
       font-style: normal;
     }
