@@ -16,7 +16,7 @@ require('./lib/localenv').init __dirname
 
 {getMeta} = require './lib/meta'
 
-MAX_DOCUMENT_CHARACTERS = 4e6
+MAX_DOCUMENT_CHARACTERS = 4e8
 ITEMS_PER_PAGE = 10
 STATIC_BASEDIR = pathlib.join(__dirname, 'static')
 META_SUFFIX = '-META.json'
@@ -49,7 +49,7 @@ app.get '/query', (req, res) ->
     url: "#{ process.env.SOLR_URL }/query"
     json: true
     qs:
-      q: req.query.q
+      q: req.query.q #+ ' url:*pdf^5 url:*docx^5' # Boost newer scans.
       rows: ITEMS_PER_PAGE
       start: Math.max(ITEMS_PER_PAGE * (Number(req.query.page) or 0), 0)
       fl: 'id,url,title'
@@ -57,8 +57,6 @@ app.get '/query', (req, res) ->
       'hl.snippets': 3
       'hl.fragsize': 0
       'hl.maxAnalyzedChars': MAX_DOCUMENT_CHARACTERS
-      pf: 'text' # Boost phrases.
-      bq: 'url:*pdf^5 url:*docx^5' # Boost newer scans.
 
   respond = (code, content) -> res.json code, content
   if req.query.d
