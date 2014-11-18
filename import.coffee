@@ -15,13 +15,14 @@ require('./lib/localenv').init __dirname
 commander
   .version('0.0.1')
   .option('-d, --basedir <path>', 'Set the path to static/data/', __dirname + '/static/data')
+  .option('-l, --limit <n>', 'Limit solr indexing to this many docs per second', 999)
 
 commander
-  .command('solr [subdir]')
+  .command('solr [subdirs...]')
   .description('Index static/data/ (or a subdir) into Solr')
-  .action (subdir) ->
-    {basedir} = commander
-    cb = ratelimit 3, 1000, (relpath, fullpath, richtext) ->
+  .action (subdirs) ->
+    {basedir, limit} = commander
+    cb = rateLimit limit, 1000, (relpath, fullpath, richtext) ->
       if richtext
         solrUpload basedir, fullpath, null, (err) ->
           if err
@@ -35,7 +36,11 @@ commander
               console.error "✗ ".red, err
             else
               console.log "✓ ".green, "#{ relpath } -> plaintext, title='#{ title }'"
-    walk basedir, subdir, cb
+    if subdirs.length
+      for dir in subdirs
+        walk basedir, dir, cb
+    else
+      walk basedir, cb
 
 commander
   .command('clear <query>')
