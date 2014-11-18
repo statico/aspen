@@ -29,7 +29,7 @@ html(ng-app='aspen')
     div(ng-show='query').container
 
       div(ng-show='error != null && !inProgress').alert.alert-danger
-        p: strong An error occurred -- you should tell Ian:
+        p: strong An error occurred -- you should <a href="mailto:ian@langworth.com">contact Ian</a>:
         p.json {{ error }}
 
       p(ng-show='totalItems').text-success

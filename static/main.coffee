@@ -29,12 +29,21 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
             if not data.response?.numFound?
               cb JSON.stringify data, null, '  '
             cb null, data
+          .error (data) ->
+            if data?.error
+              cb data.error
+            else
+              cb data
 
       metadata: (path, cb) ->
         $http.get('/metadata', params: { path: path })
-          .success((data) ->
+          .success (data) ->
             cb null, data
-          )
+          .error (data) ->
+            if data?.error
+              cb data.error
+            else
+              cb data
     }
 
   .directive 'boxDocumentViewer', ->
@@ -127,6 +136,7 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
           f: $scope.filename
 
         if err
+          console.log 'XXX', err
           $scope.error = err
           return
 

@@ -60,19 +60,19 @@ app.get '/query', (req, res) ->
       pf: 'text' # Boost phrases.
       bq: 'url:*pdf^5 url:*docx^5' # Boost newer scans.
 
-  respond = (content) -> res.json content
+  respond = (code, content) -> res.json code, content
   if req.query.d
     options.qs.debugQuery = true
     options.qs.echoParams = 'ALL'
-    respond = (content) ->
-      res.set 'Content-type', 'text/plain'
-      res.send JSON.stringify(content, null, '  ')
+    respond = (code, content) ->
+      res.header 'Content-type', 'text/plain'
+      res.send code, JSON.stringify(content, null, '  ')
 
   request options, (err, result, body) ->
     if err
-      respond { error: err }
+      respond 500, { error: err }
     else
-      respond body
+      respond 200, body
 
 app.get '/metadata', (req, res) ->
   return res.send(400) if /\.\.|\0/.test req.query.path
@@ -92,7 +92,7 @@ app.get '/metadata', (req, res) ->
       if err
         res.send 500, err
       else
-        res.json { boxview: body }
+        res.json 200, { boxview: body }
 
   else
     return res.json { error: "No metadata" }
