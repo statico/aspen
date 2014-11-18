@@ -133,7 +133,7 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
         $scope.error = null
         $scope.results = []
         $scope.totalItems = data.response.numFound
-        $scope.totalPages = Math.floor(data.response.numFound / ITEMS_PER_PAGE)
+        $scope.totalPages = Math.ceil(data.response.numFound / ITEMS_PER_PAGE)
 
         for obj in data.response.docs
           {id, url, title} = obj
