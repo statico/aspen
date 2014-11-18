@@ -5,7 +5,7 @@ html(ng-app='aspen')
 
     // Begin Bower Stylesheets
     link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
-    link(rel='stylesheet', href='bower_components/fontawesome/css/font-awesome.min.css')
+    link(rel='stylesheet', href='/bower_components/fontawesome/css/font-awesome.min.css')
     link(rel='stylesheet', href='/bower_components/viewer/dist/crocodoc.viewer.min.css')
     // End Bower Stylesheets
 
@@ -16,7 +16,7 @@ html(ng-app='aspen')
     div.topnav
       div.container
         form
-          a(href="/"): img(src='wsc.jpg').wsc.item
+          a(href="/"): img(src='/wsc.jpg').wsc.item
           label(for='query').lead.item.hidden-xs Aspen 2.0
           input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()', focus-if="!filename").item
           button(ng-click='onSearchButtonClicked()').btn.btn-primary.item
