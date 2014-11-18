@@ -63,11 +63,20 @@ app.get '/query', (req, res) ->
       pf: 'text' # Boost phrases.
       ps: 100
       bq: 'url:*pdf^5 url:*docx^5' # Boost newer scans.
+
+  respond = (content) -> res.json content
+  if req.query.d
+    options.qs.debugQuery = true
+    options.qs.echoParams = 'ALL'
+    respond = (content) ->
+      res.set 'Content-type', 'text/plain'
+      res.send JSON.stringify(content, null, '  ')
+
   request options, (err, result, body) ->
     if err
-      res.json { error: err }
+      respond { error: err }
     else
-      res.json body
+      respond body
 
 app.get '/metadata', (req, res) ->
   return res.send(400) if /\.\.|\0/.test req.query.path
