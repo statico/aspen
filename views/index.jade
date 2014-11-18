@@ -32,7 +32,10 @@ html(ng-app='aspen')
         p: strong An error occurred -- you should <a href="mailto:ian@langworth.com">contact Ian</a>:
         p.json {{ error }}
 
-      p(ng-show='totalItems').text-success
+      p(ng-show='inProgress').text-success
+        span.fa.fa-spin.fa-circle-o-notch
+
+      p(ng-show='totalItems && !inProgress').text-success
         | {{ totalItems }} results found.
         | Page {{ currentPage }} of {{ totalPages }}.
 
