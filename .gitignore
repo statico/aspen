@@ -1,4 +1,6 @@
 bower_components
+elasticsearch-data
+elasticsearch.yml
 env
 logs
 node_modules

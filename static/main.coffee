@@ -136,22 +136,21 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
           f: $scope.filename
 
         if err
-          console.log 'XXX', err
           $scope.error = err
           return
 
         $scope.error = null
         $scope.results = []
-        $scope.totalItems = data.response.numFound
-        $scope.totalPages = Math.ceil(data.response.numFound / ITEMS_PER_PAGE)
+        $scope.totalItems = data.hits.total
+        $scope.totalPages = Math.ceil($scope.totalItems / ITEMS_PER_PAGE)
 
-        for obj in data.response.docs
-          {id, url, title} = obj
+        for obj in data.hits.hits
           $scope.results.push {
-            id: id
-            url: "#{ DATA_BASEURL }/#{ url }"
-            title: title?[0] ? url
-            snippet: $sce.trustAsHtml(data.highlighting[id].text?.join ' ... ')
+            id: obj._id
+            url: "#{ DATA_BASEURL }/#{ obj._source.path }"
+            title: obj._source.title ? obj._source.path
+            snippet: $sce.trustAsHtml(obj.highlight.text?.join ' ... ')
+            score: obj._score
           }
 
         $window.scrollTo 0, 0

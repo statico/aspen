@@ -9,6 +9,7 @@ require('./lib/localenv').init __dirname
 
 {boxViewUpload} = require './lib/boxview'
 {solrUpload, solrClearAll, solrClearQuery} = require './lib/solr'
+{esUpload, esReset} = require './lib/elasticsearch'
 {walk} = require './lib/walker'
 {extractTitle} = require './lib/plaintext'
 
@@ -53,17 +54,54 @@ commander
       walk basedir, walkfn
 
 commander
-  .command('clear <query>')
+  .command('solr-clear <query>')
   .description('Clears some documents from Solr, like "RML/*"')
   .action (query) ->
     solrClearQuery query, (err, res, body) ->
       console.log "✓ ".green, "Done."
 
 commander
-  .command('clearall')
+  .command('solr-clearall')
   .description('Empty the Solr database')
   .action ->
     solrClearAll ->
+      console.log "✓ ".green, "Done."
+
+commander
+  .command('es [subdirs...]')
+  .description('Index static/data/ (or a subdir) into ElasticSearch')
+  .action (subdirs) ->
+    {basedir, concurrency} = commander
+
+    indexfn = ({relpath, fullpath, richtext}, done) ->
+      if richtext
+        console.error "✗ ".red, "Not indexing richtext yet"
+      else
+        extractTitle fullpath, (title) ->
+          esUpload basedir, fullpath, title, (err) ->
+            if err
+              console.error "✗ ".red, err
+            else
+              console.log "✓ ".green, "#{ relpath } -> plaintext, title='#{ title }'"
+          done()
+
+    queue = async.queue indexfn, concurrency
+
+    walkfn = (relpath, fullpath, richtext) ->
+      queue.push {relpath: relpath, fullpath: fullpath, richtext: richtext}, (err) ->
+        console.error "Couldn't push to queue: #{ err }".red if err
+
+    if subdirs.length
+      for dir in subdirs
+        walk basedir, dir, walkfn
+    else
+      walk basedir, walkfn
+
+commander
+  .command('es-reset')
+  .description('Empty and initialize the ElasticSearch database')
+  .action ->
+    esReset ->
       console.log "✓ ".green, "Done."
 
 commander

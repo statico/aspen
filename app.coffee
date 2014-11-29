@@ -1,4 +1,4 @@
-#!./node_modules/coffee-script/bin/coffee
+#!./node_modules/.bin/coffee
 #
 # Aspen frontend web server. License: MIT
 
@@ -15,6 +15,7 @@ serveIndex = require 'serve-index'
 require('./lib/localenv').init __dirname
 
 {getMeta} = require './lib/meta'
+{esQuery} =  require './lib/elasticsearch'
 
 MAX_DOCUMENT_CHARACTERS = 4e8
 ITEMS_PER_PAGE = 10
@@ -43,30 +44,35 @@ app.get '/', (req, res) ->
 # RPCs ----------------------------------------------------------------------
 
 app.get '/query', (req, res) ->
+  # Chrome+Angular caches this.
   res.header 'Cache-Control', 'no-cache'
-  options =
-    method: 'GET'
-    url: "#{ process.env.SOLR_URL }/query"
-    json: true
-    qs:
-      q: req.query.q #+ ' url:*pdf^5 url:*docx^5' # Boost newer scans.
-      rows: ITEMS_PER_PAGE
-      start: Math.max(ITEMS_PER_PAGE * (Number(req.query.page) or 0), 0)
-      fl: 'id,url,title'
-      'hl': true
-      'hl.snippets': 3
-      'hl.fragsize': 0
-      'hl.maxAnalyzedChars': MAX_DOCUMENT_CHARACTERS
 
-  respond = (code, content) -> res.json code, content
+  # Stupify smart quotes which sometimes get pasted in.
+  query = req.query.q
+    .replace(/“|”/g, '"')
+    .replace(/‘|’/g, "'")
+
+  obj =
+    query:
+      simple_query_string:
+        query: query
+    highlight:
+      fields:
+        text:
+          fragment_size: 400
+          number_of_fragments: 3
+    _source: ['title', 'path']
+    size: ITEMS_PER_PAGE
+    from: Math.max(ITEMS_PER_PAGE * (Number(req.query.page) or 0), 0)
+
+  respond = (code, content) -> res.status(code).json content
   if req.query.d
-    options.qs.debugQuery = true
-    options.qs.echoParams = 'ALL'
+    obj.explain = true
     respond = (code, content) ->
       res.header 'Content-type', 'text/plain'
-      res.send code, JSON.stringify(content, null, '  ')
+      res.status(code).send JSON.stringify(content, null, '  ')
 
-  request options, (err, result, body) ->
+  esQuery obj, (err, _, body) ->
     if err
       respond 500, { error: err }
     else
