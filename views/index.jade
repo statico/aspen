@@ -8,7 +8,6 @@ html(ng-app='aspen')
     // Begin Bower Stylesheets
     link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
     link(rel='stylesheet', href='/bower_components/fontawesome/css/font-awesome.min.css')
-    link(rel='stylesheet', href='/bower_components/viewer/dist/crocodoc.viewer.min.css')
     // End Bower Stylesheets
 
     link(rel='stylesheet', href='/main.css')
@@ -47,7 +46,7 @@ html(ng-app='aspen')
       div.result(dir-paginate='result in results | itemsPerPage: itemsPerPage',
                 current-page='currentPage'
                 total-items='totalItems')
-        a(ng-click='onResultClick(result)')
+        a(href="{{ result.url }}")
           span.title {{ result.title }}
           | &nbsp;
           small.text-muted {{ result.url }}
@@ -77,17 +76,12 @@ html(ng-app='aspen')
         em Note: &nbsp;
         | Capitalization doesn't count except for <code>AND</code> and <code>OR</code>
 
-    //div(ng-if='filename', focus-if="filename", ng-click="hideViewer()")#viewer
-    //div(ng-if='fileBoxViewURL').inline: div(box-document-viewer='fileBoxViewURL')
-    //iframe(ng-if='fileIframeURL', ng-src="{{ fileIframeURL }}").inline
-
   // Begin Bower JavaScript
   script(src='/bower_components/jquery/dist/jquery.min.js')
   script(src='/bower_components/angular/angular.js')
   script(src='/bower_components/angular-route/angular-route.js')
   script(src='/bower_components/angular-sanitize/angular-sanitize.js')
   script(src='/bower_components/angular-utils-pagination/dirPagination.js')
-  script(src='/bower_components/viewer/dist/crocodoc.viewer.min.js')
   // End Bower JavaScript
 
   script(src='/main.js')

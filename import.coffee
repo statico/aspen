@@ -7,7 +7,6 @@ pathlib = require 'path'
 
 require('./lib/localenv').init __dirname
 
-{boxViewUpload} = require './lib/boxview'
 {solrUpload, solrClearAll, solrClearQuery} = require './lib/solr'
 {esUpload, esReset} = require './lib/elasticsearch'
 {walk} = require './lib/walker'
@@ -103,19 +102,6 @@ commander
   .action ->
     esReset ->
       console.log "✓ ".green, "Done."
-
-commander
-  .command('boxview [subdir]')
-  .description('Look for rich text documents and upload them to BoxView')
-  .action (subdir) ->
-    {basedir} = commander
-    walk basedir, subdir, (relpath, fullpath, richtext) ->
-      return unless richtext
-      boxViewUpload basedir, relpath, (err) ->
-        if err
-          console.error "✗ ".red, err
-        else
-          console.log "✓ ".green, relpath
 
 commander
   .command('*')

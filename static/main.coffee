@@ -46,18 +46,6 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
               cb data
     }
 
-  .directive 'boxDocumentViewer', ->
-    return {
-      restrict: 'A'
-      link: (scope, element, attrs) ->
-        viewer = Crocodoc.createViewer element, {
-          url: scope.$eval attrs.boxDocumentViewer
-          zoom: Crocodoc.ZOOM_AUTO
-        }
-        viewer.load()
-        element.on '$destroy', -> viewer.destroy()
-    }
-
   .directive 'focusIf', (utils) ->
     return {
       restrict: 'A'
@@ -156,50 +144,3 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
         $window.scrollTo 0, 0
 
     doSearch()
-
-    # File viewing
-
-    $scope.onResultClick = (result) ->
-      url = result.url
-      server.metadata url, (err, data) ->
-        if data?.boxview?
-          document.location.href = data.boxview.urls.view
-        else
-          document.location.href = url
-
-###
-    populateViewer = (url) ->
-      $scope.filename = url
-      $location.search f: url
-
-      $scope.fileIframeURL = null
-      $scope.fileBoxViewURL = null
-
-      server.metadata url, (err, data) ->
-        if err
-          $scope.error = "Couldn't display filename: #{ err }"
-          return
-
-        if data.boxview?
-          document.location.href = data.boxview.urls.view
-          #$scope.fileIframeURL = data.boxview.urls.view
-          #$scope.fileBoxViewURL = data.boxview.urls.assets
-
-        #else if (/\.txt$/i).test url
-          #$scope.fileIframeURL = url
-
-        else
-          document.location.href = '/static/' + url
-
-    populateViewer($scope.filename) if $scope.filename
-
-    $scope.hideViewer = ->
-      $scope.filename = null
-      $location.search f: null
-
-    $scope.onResultClick = (result) ->
-      populateViewer(result.url)
-
-  .config ($sceDelegateProvider) ->
-    $sceDelegateProvider.resourceUrlWhitelist(['self', 'https://view-api.box.com/**'])
-###
