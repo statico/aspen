@@ -2,7 +2,7 @@ walklib = require 'walk'
 pathlib = require 'path'
 
 # Pass basedir and optional subdir.
-# Callback args are: relpath, fullpath, richtext
+# Callback args are: relpath, fullpath
 exports.walk = (basedir, subdir, cb) ->
   if not cb?
     cb = subdir
@@ -21,10 +21,7 @@ exports.walk = (basedir, subdir, cb) ->
       # Ignore dotfiles.
 
     else if (/\.txt$/i).test name
-      cb relpath, fullpath, false
-
-    else if (/\.(pdf|rtf|docx?)$/i).test name
-      cb relpath, fullpath, true
+      cb relpath, fullpath
 
     else
       # Ignore.

@@ -23,27 +23,19 @@ commander
   .action (subdirs) ->
     {basedir, concurrency} = commander
 
-    indexfn = ({relpath, fullpath, richtext}, done) ->
-      if richtext
-        solrUpload basedir, fullpath, null, (err) ->
+    indexfn = ({relpath, fullpath}, done) ->
+      extractTitle fullpath, (title) ->
+        solrUpload basedir, fullpath, title, (err) ->
           if err
             console.error "✗ ".red, err
           else
-            console.log "✓ ".green, "#{ relpath } -> rich text"
-          done()
-      else
-        extractTitle fullpath, (title) ->
-          solrUpload basedir, fullpath, title, (err) ->
-            if err
-              console.error "✗ ".red, err
-            else
-              console.log "✓ ".green, "#{ relpath } -> plaintext, title='#{ title }'"
-          done()
+            console.log "✓ ".green, "#{ relpath } -> '#{ title }'"
+        done()
 
     queue = async.queue indexfn, concurrency
 
-    walkfn = (relpath, fullpath, richtext) ->
-      queue.push {relpath: relpath, fullpath: fullpath, richtext: richtext}, (err) ->
+    walkfn = (relpath, fullpath) ->
+      queue.push {relpath: relpath, fullpath: fullpath}, (err) ->
         console.error "Couldn't push to queue: #{ err }".red if err
 
     if subdirs.length
@@ -72,22 +64,19 @@ commander
   .action (subdirs) ->
     {basedir, concurrency} = commander
 
-    indexfn = ({relpath, fullpath, richtext}, done) ->
-      if richtext
-        console.error "✗ ".red, "Not indexing richtext yet"
-      else
-        extractTitle fullpath, (title) ->
-          esUpload basedir, fullpath, title, (err) ->
-            if err
-              console.error "✗ ".red, err
-            else
-              console.log "✓ ".green, "#{ relpath } -> plaintext, title='#{ title }'"
-          done()
+    indexfn = ({relpath, fullpath}, done) ->
+      extractTitle fullpath, (title) ->
+        esUpload basedir, fullpath, title, (err) ->
+          if err
+            console.error "✗ ".red, err
+          else
+            console.log "✓ ".green, "#{ relpath }", "-> #{ title }".bold.blue
+        done()
 
     queue = async.queue indexfn, concurrency
 
-    walkfn = (relpath, fullpath, richtext) ->
-      queue.push {relpath: relpath, fullpath: fullpath, richtext: richtext}, (err) ->
+    walkfn = (relpath, fullpath) ->
+      queue.push {relpath: relpath, fullpath: fullpath}, (err) ->
         console.error "Couldn't push to queue: #{ err }".red if err
 
     if subdirs.length

@@ -1,6 +1,7 @@
 fs = require 'fs'
 pathlib = require 'path'
 request = require 'request'
+crypto = require 'crypto'
 
 ELASTICSEARCH_URL = process.env.ELASTICSEARCH_URL or 'http://localhost:9200'
 
@@ -57,8 +58,9 @@ esReset = exports.esReset = (cb) ->
 
 esUpload = exports.esUpload = (basedir, fullpath, title, cb) ->
   relpath = pathlib.relative basedir, fullpath
+  id = crypto.createHash('md5').update(relpath).digest('hex')
   _doRequest cb,
-    url: "#{ ELASTICSEARCH_URL }/aspen/file"
+    url: "#{ ELASTICSEARCH_URL }/aspen/file/#{ id }"
     method: 'post'
     json: true
     body:
