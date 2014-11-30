@@ -59,6 +59,7 @@ app.get '/query', (req, res) ->
       fields: ['text.english']
       analyzer: 'english_nostop'
       lenient: true
+      phrase_slop: if req.query.slop then 50 else 0
 
   should =
     match_phrase:
@@ -67,38 +68,31 @@ app.get '/query', (req, res) ->
         boost: 10
         lenient: true
 
+  highlight =
+    type: 'plain'
+    fragment_size: 500
+    number_of_fragments: 3
+    highlight_query:
+      bool:
+        minimum_should_match: 0
+        must: must
+        should: should
+
   obj =
     _source: ['title', 'path']
     size: ITEMS_PER_PAGE
     from: Math.max(ITEMS_PER_PAGE * (Number(req.query.page) or 0), 0)
-
     query: must
-
     rescore:
       window_size: 50
       query:
         rescore_query_weight: 10
         rescore_query: should
-
     highlight:
       order: 'score'
       fields:
-        'text.english':
-          fragment_size: 400
-          number_of_fragments: 3
-          highlight_query:
-            bool:
-              minimum_should_match: 0
-              must: must
-              should: should
-        text:
-          fragment_size: 400
-          number_of_fragments: 3
-          highlight_query:
-            bool:
-              minimum_should_match: 0
-              must: must
-              should: should
+        'text.english': highlight
+        text: highlight
 
   respond = (code, content) -> res.status(code).json content
   if req.query.d

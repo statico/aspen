@@ -23,8 +23,9 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
   .factory 'server', ($http, $rootScope) ->
     return {
 
-      query: (query, page, cb) ->
-        $http.get('/query', params: { q: query, page: page - 1 })
+      query: (query, page, slop, cb) ->
+        slop = if slop then 1 else null
+        $http.get('/query', params: { q: query, page: page - 1, slop: slop })
           .success (data) ->
             if not data.response?.numFound?
               cb JSON.stringify data, null, '  '
@@ -69,6 +70,7 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
       $scope.query = s.q or ''
       $scope.currentPage = Number(s.p) or 1
       $scope.filename = s.f
+      $scope.slop = Boolean(s.slop)
     updateScopeFromLocation()
 
     updateTitle = ->
@@ -115,13 +117,14 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
     doSearch = ->
       $scope.inProgress = true
 
-      server.query $scope.query, $scope.currentPage, (err, data) ->
+      server.query $scope.query, $scope.currentPage, $scope.slop, (err, data) ->
         updateTitle()
         $scope.inProgress = false
         $location.search
           q: $scope.query
           p: if Number($scope.currentPage) is 1 then null else $scope.currentPage
           f: $scope.filename
+          slop: if $scope.slop then 1 else null
 
         if err
           $scope.error = err
@@ -134,6 +137,7 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
 
         for obj in data.hits.hits
           highlight = obj.highlight?.text ? obj.highlight?['text.english']
+          console.log 'XXX', highlight
           $scope.results.push {
             id: obj._id
             url: "#{ DATA_BASEURL }/#{ obj._source.path }"

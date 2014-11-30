@@ -24,6 +24,10 @@ html(ng-app='aspen')
             span.hidden-xs Search
             span.visible-xs.fa.fa-search.fa-reverse
           a(href='/data/').btn.btn-default.item.hidden-xs Browse
+          span.nowrap
+            input(id='slop', type='checkbox', ng-model='slop', ng-change='onSearchKeyDown()')
+            label(for='slop').hidden-xs Sloppy?
+            label(for='slop').visible-xs-inline S
 
     div(ng-show='query').container
 
@@ -72,6 +76,10 @@ html(ng-app='aspen')
         br
         | Must contain the exact phrase, "i would drink it": &nbsp;
         code "i would drink it"
+        br
+        | Check "Sloppy" and search for
+        code "outside and inside meet so easily"
+        | to search over page breaks
         br
         em Note: &nbsp;
         | Capitalization doesn't count except for <code>AND</code> and <code>OR</code>

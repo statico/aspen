@@ -34,7 +34,7 @@ a {
 @media (max-width: @screen-lg-min) {
   .topnav {
     input[type=text] {
-      width: 40%;
+      width: 30%;
     }
   }
 }
@@ -73,5 +73,14 @@ a {
 
 .json {
   font-family: monospace;
-  white-space: pre;
+  white-space: pre-wrap;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+label {
+  font-weight: normal;
+  cursor: pointer;
 }
