@@ -146,8 +146,83 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
             title: obj._source.title ? obj._source.path
             snippet: $sce.trustAsHtml(highlight?.join ' ... ')
             score: obj._score
+            locations: obj.highlight_locations
           }
 
+        #$rootScope.$broadcast 'viewFile', $scope.results[0].url, $scope.results[0].locations # XXXXXXXXXXXXX
         $window.scrollTo 0, 0
 
     doSearch()
+
+    # Results interaction
+
+    $scope.onResultClicked = (path, locations) ->
+      $rootScope.$broadcast 'viewFile', path, locations
+
+  .controller 'FileViewController', (utils, $rootScope, $scope, $http, $sce, $timeout) ->
+
+    reset = ->
+      $scope.path = null
+      $scope.contents = ''
+      $scope.locations = []
+      $scope.currentLocation = 0
+      $scope.error = null
+    reset()
+
+    $rootScope.$on 'viewFile', (event, path, locations) ->
+      reset()
+      $scope.path = path
+      $scope.locations = locations
+
+      # Only view text files.
+      if not (/.txt$/i).test path
+        document.location.pathname = path
+        return
+
+      $scope.inProgress = true
+      $http.get(path)
+        .success (data) ->
+          $scope.inProgress = false
+          window.jQuery('#viewer').modal()
+          $scope.contents = data
+          $scope.jumpToLocation()
+        .error (data, status) ->
+          $scope.inProgress = false
+          window.jQuery('#viewer').modal()
+          $scope.error = "Server returned status: #{ status }"
+
+      $scope.goToNextLocation = ->
+        if $scope.currentLocation < $scope.locations.length - 1
+          $scope.currentLocation++
+        $scope.jumpToLocation()
+
+      $scope.goToPreviousLocation = ->
+        if $scope.currentLocation > 0
+          $scope.currentLocation--
+        $scope.jumpToLocation()
+
+      $scope.jumpToLocation = ->
+        tuple = $scope.locations[$scope.currentLocation]
+        return unless tuple
+        [start, end] = tuple
+
+        contents = $scope.contents
+
+        contents = contents.substring(0, start) \
+          + '__STARTSPAN__ id="viewer-highlight">' \
+          + contents.substring(start, end) \
+          + '__ENDSPAN__' \
+          + contents.substring(end)
+        contents = contents
+          .replace(/</g, '&lt;')
+          .replace('__STARTSPAN__', '<span')
+          .replace('__ENDSPAN__', '</span>')
+
+        $scope.highlightedContents = $sce.trustAsHtml contents
+
+        # Run this after Angular has updated the DOM.
+        # http://stackoverflow.com/a/17239084/102704
+        fn = ->
+          window.jQuery('#viewer .contents')
+            .scrollTo('#viewer-highlight', 0, { offset: { top: -100 } })
+        $timeout fn, 0

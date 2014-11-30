@@ -50,7 +50,7 @@ html(ng-app='aspen')
       div.result(dir-paginate='result in results | itemsPerPage: itemsPerPage',
                 current-page='currentPage'
                 total-items='totalItems')
-        a(href="{{ result.url }}")
+        a(ng-click='onResultClicked(result.url, result.locations)')
           span.title {{ result.title }}
           | &nbsp;
           small.text-muted {{ result.url }}
@@ -84,8 +84,44 @@ html(ng-app='aspen')
         em Note: &nbsp;
         | Capitalization doesn't count except for <code>AND</code> and <code>OR</code>
 
+  div(id='viewer', ng-controller='FileViewController').modal
+    div.modal-dialog.modal-lg
+      div.modal-content
+
+        div.modal-header
+          a(data-dismiss='modal').btn.btn-default.pull-right
+            span.fa.fa-close
+            | &nbsp; Close
+          a(href="{{ path }}", target='_blank').btn.btn-default.pull-right
+            span.fa.fa-external-link
+            | &nbsp; Open
+          h4.modal-title {{ path }}
+
+        div.modal-body
+
+          div(ng-show='inProgress').text-success
+            span.fa.fa-spin.fa-circle-o-notch
+
+          div(ng-show='error != null && !inProgress').alert.alert-danger
+            p: strong An error occurred:
+            p.json {{ error }}
+
+          div(ng-show='!inProgress && !error')
+            p: div(ng-show='locations.length').btn-group
+              button(ng-class="{disabled: currentLocation == 0}", ng-click='goToPreviousLocation()').btn.btn-default
+                span.fa.fa-caret-left
+                | &nbsp; Previous
+              button(disabled).btn.btn-default
+                | Match {{ currentLocation + 1 }} of {{ locations.length }}
+              button(ng-class="{disabled: currentLocation >= locations.length - 1}", ng-click='goToNextLocation()').btn.btn-default
+                | Next &nbsp;
+                span.fa.fa-caret-right
+            div(ng-bind-html='highlightedContents').contents
+
   // Begin Bower JavaScript
   script(src='/bower_components/jquery/dist/jquery.min.js')
+  script(src='/bower_components/bootstrap/dist/js/bootstrap.min.js')
+  script(src='/bower_components/jquery.scrollTo/jquery.scrollTo.min.js')
   script(src='/bower_components/angular/angular.js')
   script(src='/bower_components/angular-route/angular-route.js')
   script(src='/bower_components/angular-sanitize/angular-sanitize.js')

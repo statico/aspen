@@ -54,6 +54,9 @@ a {
 }
 
 .results {
+  a {
+    cursor: pointer;
+  }
   .result {
     margin-bottom: 1em;
     .title {
@@ -83,6 +86,21 @@ a {
 label {
   font-weight: normal;
   cursor: pointer;
+}
+
+#viewer {
+  .modal-header .btn.pull-right {
+    margin-left: 1em;
+  }
+  .contents {
+    font: 14px/1.2 Menlo, Monaco, Consolas, monospace;
+    white-space: pre;
+    overflow: scroll;
+    max-height: 500px;
+  }
+}
+#viewer-highlight {
+  background: #ff0;
 }
 
 body.test {

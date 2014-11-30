@@ -54,60 +54,117 @@ app.get '/query', (req, res) ->
     .replace(/“|”/g, '"')
     .replace(/‘|’/g, "'")
 
-  must =
-    query_string:
-      query: query
-      default_operator: 'and'
-      fields: ['text.english']
-      analyzer: 'english_nostop'
-      lenient: true
-      phrase_slop: if req.query.slop then 50 else 0
+  # Run the query twice. Get full highlight data first (but that's huge, so don't send it to the
+  # user), then use that data to annotate the data the client gets. Basically, this:
+  # http://stackoverflow.com/q/15072806/102704 and http://stackoverflow.com/q/4512656/102704
+  buildQueryObject = (meta) ->
 
-  should =
-    match_phrase:
-      message:
+    # The main query.
+    must =
+      query_string:
         query: query
-        boost: 10
+        default_operator: 'and'
+        fields: ['text.english']
+        analyzer: 'english_nostop'
         lenient: true
+        phrase_slop: if req.query.slop then 50 else 0
 
-  highlight =
-    type: 'plain'
-    fragment_size: 500
-    number_of_fragments: 3
-    highlight_query:
-      bool:
-        minimum_should_match: 0
-        must: must
-        should: should
+    # An optional query we use to boost results and highlighting.
+    should =
+      match_phrase:
+        message:
+          query: query
+          boost: 10
+          lenient: true
 
-  obj =
-    _source: ['title', 'path']
-    size: ITEMS_PER_PAGE
-    from: Math.max(ITEMS_PER_PAGE * (Number(req.query.page) or 0), 0)
-    query: must
-    rescore:
-      window_size: 50
-      query:
-        rescore_query_weight: 10
-        rescore_query: should
-    highlight:
-      order: 'score'
-      fields:
-        'text.english': highlight
-        text: highlight
+    highlight =
+      type: 'plain'
+      fragment_size: 500
+      number_of_fragments: if meta then 0 else 3
+      highlight_query:
+        bool:
+          minimum_should_match: 0
+          must: must
+          should: should
 
-  respond = (code, content) -> res.status(code).json content
-  if req.query.d
-    obj.explain = true
-    respond = (code, content) ->
-      res.header 'Content-type', 'text/plain'
-      res.status(code).send JSON.stringify(content, null, '  ')
+    obj =
+      _source: ['title', 'path']
+      size: ITEMS_PER_PAGE
+      from: Math.max(ITEMS_PER_PAGE * (Number(req.query.page) or 0), 0)
+      query: must
+      rescore:
+        window_size: 50
+        query:
+          rescore_query_weight: 10
+          rescore_query: should
+      highlight:
+        order: 'score'
+        fields:
+          'text.english': highlight
+          text: highlight
 
-  esQuery obj, (err, _, body) ->
-    if err
-      respond 500, { error: err }
-    else
-      respond 200, body
+    if meta
+      obj.highlight.pre_tags = ['__HLS__'] # Highlight start
+      obj.highlight.post_tags = ['__HLE__'] # Highlight end
+
+    return obj
+
+  # First pass: get highlight information.
+  obj1 = buildQueryObject true
+  esQuery obj1, (err, _, meta) ->
+    return res.status(500).json { error: err } if err
+
+    # Second pass: what we annotate and send to the client.
+    obj2 = buildQueryObject false
+    esQuery obj2, (err, _, body) ->
+
+      # Add query time to the total.
+      body.took += meta.took
+
+      # Debug mode when testing the URL in the browser.
+      respond = (code, content) -> res.status(code).json content
+      if req.query.d
+        obj2.explain = true
+        respond = (code, content) ->
+          res.header 'Content-type', 'text/plain'
+          res.status(code).send JSON.stringify(content, null, '  ')
+
+      # Annotate with highlight marker information.
+      if body.hits?.hits?.length
+        for hit, index in body.hits.hits
+
+          locations = [] # Tuples of [start, stop] locations for each matches.
+          metahit = meta.hits.hits[index]
+          content = metahit.highlight['text.english']?[0] ? metahit.highlight.text?[0]
+          if not content
+            console.error "Can't get meta content for hit #{ index } of query: #{ query }"
+            continue
+
+          # Highlighter only highlights one term at a time, so compact phrase matches.
+          content = content.replace /__HLE__\s+__HLS__/g, ' '
+
+          # Markers are 7 characters long. That's easy to remember.
+          # o = pointer to original text document
+          # c = pointer to content with __HLE__ and __HLS__ markers
+          # os, oe = start and end of original highlight location
+          # cs, ce = start and end of highlighted location
+          o = c = 0
+          loop
+            cs = content.indexOf '__HLS__', c
+            break if cs is -1
+            ce = content.indexOf '__HLE__', cs
+            os = cs - locations.length * 14
+            oe = ce - locations.length * 14 - 7
+            locations.push [os, oe]
+            o = oe
+            c = ce
+
+          hit.highlight_locations = locations
+
+      if err
+        respond 500, { error: err }
+      else
+        respond 200, body
 
 # ---------------------------------------------------------------------------
 
