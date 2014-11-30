@@ -26,6 +26,8 @@ exports.extractTitle = (path, cb) ->
   strip = /^.*(@@|TITLE:\s+)/
 
   lineReader.eachLine path, (line, last) ->
+    return true if /^### /.test line # Ignore UnRTF messages.
+
     first ?= line
 
     if match.test line
