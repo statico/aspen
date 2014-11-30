@@ -133,11 +133,12 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
         $scope.totalPages = Math.ceil($scope.totalItems / ITEMS_PER_PAGE)
 
         for obj in data.hits.hits
+          highlight = obj.highlight?.text ? obj.highlight?['text.english']
           $scope.results.push {
             id: obj._id
             url: "#{ DATA_BASEURL }/#{ obj._source.path }"
             title: obj._source.title ? obj._source.path
-            snippet: $sce.trustAsHtml(obj.highlight.text?.join ' ... ')
+            snippet: $sce.trustAsHtml(highlight?.join ' ... ')
             score: obj._score
           }
 

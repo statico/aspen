@@ -54,10 +54,17 @@ app.get '/query', (req, res) ->
 
   obj =
     query:
-      simple_query_string:
+      query_string:
         query: query
+        default_operator: 'and'
+        fields: ['text.english']
+        analyzer: 'english_nostop'
     highlight:
+      order: 'score'
       fields:
+        'text.english':
+          fragment_size: 400
+          number_of_fragments: 3
         text:
           fragment_size: 400
           number_of_fragments: 3

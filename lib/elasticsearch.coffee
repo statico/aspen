@@ -22,19 +22,38 @@ esReset = exports.esReset = (cb) ->
     console.log 'Results from DELETE:', body
     _doRequest cb,
       url: "#{ ELASTICSEARCH_URL }/aspen"
-      method: 'put'
+      method: 'post'
       json: true
       body:
         mappings:
-          title:
-            type: 'string'
-          path:
-            type: 'string'
-          text:
-            type: 'string'
-            analyzer: 'english'
-            term_vector: 'with_positions_offsets'
-            #store: true # ???
+          file:
+            properties:
+              title:
+                type: 'string'
+              path:
+                type: 'string'
+              text:
+                type: 'string'
+                term_vector: 'with_positions_offsets_payloads'
+                fields:
+                  english:
+                    type: 'string'
+                    analyzer: 'english_nostop'
+                    term_vector: 'with_positions_offsets_payloads'
+                    store: true
+        settings:
+          analysis:
+            filter:
+              english_stemmer:
+                type: 'stemmer'
+                language: 'english'
+              english_possessive_stemmer:
+                type: 'stemmer'
+                language: 'possessive_english'
+            analyzer:
+              english_nostop:
+                tokenizer: 'standard'
+                filter: ['english_possessive_stemmer', 'lowercase',  'english_stemmer']
 
 esUpload = exports.esUpload = (basedir, fullpath, title, cb) ->
   relpath = pathlib.relative basedir, fullpath
