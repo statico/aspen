@@ -14,9 +14,9 @@ This expects lots of content to be symlinked in `static/data`.
     $ npm run solr-dev &
     $ ./import.coffee solr
 
-## Notes
+## Plaintext Only
 
-* PDF documents should have the correct title embedded in them.
+Only plaintext documents are supported. To convert a MSWord doc or PDF to plaintext, install [Apache Tika](http://tika.apache.org/) and [par](http://www.nicemice.net/par/) and run `convert.sh`.
 
 ## Commands
 
