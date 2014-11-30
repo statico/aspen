@@ -33,7 +33,7 @@ exports.extractTitle = (path, cb) ->
       return false
 
     if last
-      cb first
+      cb first or path.replace(/^.+\//, '')
       return false
 
     return true
