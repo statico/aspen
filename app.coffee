@@ -52,25 +52,53 @@ app.get '/query', (req, res) ->
     .replace(/“|”/g, '"')
     .replace(/‘|’/g, "'")
 
-  obj =
-    query:
-      query_string:
+  must =
+    query_string:
+      query: query
+      default_operator: 'and'
+      fields: ['text.english']
+      analyzer: 'english_nostop'
+      lenient: true
+
+  should =
+    match_phrase:
+      message:
         query: query
-        default_operator: 'and'
-        fields: ['text.english']
-        analyzer: 'english_nostop'
+        boost: 10
+        lenient: true
+
+  obj =
+    _source: ['title', 'path']
+    size: ITEMS_PER_PAGE
+    from: Math.max(ITEMS_PER_PAGE * (Number(req.query.page) or 0), 0)
+
+    query: must
+
+    rescore:
+      window_size: 50
+      query:
+        rescore_query_weight: 10
+        rescore_query: should
+
     highlight:
       order: 'score'
       fields:
         'text.english':
           fragment_size: 400
           number_of_fragments: 3
+          highlight_query:
+            bool:
+              minimum_should_match: 0
+              must: must
+              should: should
         text:
           fragment_size: 400
           number_of_fragments: 3
-    _source: ['title', 'path']
-    size: ITEMS_PER_PAGE
-    from: Math.max(ITEMS_PER_PAGE * (Number(req.query.page) or 0), 0)
+          highlight_query:
+            bool:
+              minimum_should_match: 0
+              must: must
+              should: should
 
   respond = (code, content) -> res.status(code).json content
   if req.query.d
