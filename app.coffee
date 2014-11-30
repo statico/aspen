@@ -14,14 +14,11 @@ serveIndex = require 'serve-index'
 
 require('./lib/localenv').init __dirname
 
-{getMeta} = require './lib/meta'
 {esQuery} =  require './lib/elasticsearch'
 
 MAX_DOCUMENT_CHARACTERS = 4e8
 ITEMS_PER_PAGE = 10
 STATIC_BASEDIR = pathlib.join(__dirname, 'static')
-META_SUFFIX = '-META.json'
-BOX_VIEW_BASEURL = 'https://view-api.box.com/1'
 
 app = express()
 app.set 'views', pathlib.join(__dirname, 'views')
@@ -106,29 +103,6 @@ app.get '/query', (req, res) ->
       respond 500, { error: err }
     else
       respond 200, body
-
-app.get '/metadata', (req, res) ->
-  return res.send(400) if /\.\.|\0/.test req.query.path
-
-  metadata = getMeta pathlib.join(STATIC_BASEDIR, req.query.path)
-
-  if metadata?.boxview
-    options =
-      method: 'POST'
-      url: BOX_VIEW_BASEURL + '/sessions'
-      headers:
-        'Authorization': "Token #{ process.env.BOX_VIEW_API_KEY }"
-        'Content-Type': 'application/json'
-      body: JSON.stringify { document_id: metadata.boxview.id }
-      json: true
-    request options, (err, result, body) ->
-      if err
-        res.send 500, err
-      else
-        res.json 200, { boxview: body }
-
-  else
-    return res.json { error: "No metadata" }
 
 # ---------------------------------------------------------------------------
 

@@ -22,23 +22,12 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
 
   .factory 'server', ($http, $rootScope) ->
     return {
-
       query: (query, page, slop, cb) ->
         slop = if slop then 1 else null
         $http.get('/query', params: { q: query, page: page - 1, slop: slop })
           .success (data) ->
             if not data.response?.numFound?
               cb JSON.stringify data, null, '  '
-            cb null, data
-          .error (data) ->
-            if data?.error
-              cb data.error
-            else
-              cb data
-
-      metadata: (path, cb) ->
-        $http.get('/metadata', params: { path: path })
-          .success (data) ->
             cb null, data
           .error (data) ->
             if data?.error
