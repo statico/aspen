@@ -29,7 +29,10 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
             cb null, data
           .error (data) ->
             if data?.error
-              cb data.error
+              if /QueryParsingException/.test "#{ data.error }"
+                cb "Query incomplete."
+              else
+                cb data.error
             else
               cb data
     }
@@ -131,6 +134,9 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
 
         if err
           $scope.error = err
+          $scope.results = []
+          $scope.totalItems = 0
+          $scope.totalPages = 0
           return
 
         $scope.error = null
@@ -149,7 +155,6 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
             locations: obj.highlight_locations
           }
 
-        #$rootScope.$broadcast 'viewFile', $scope.results[0].url, $scope.results[0].locations # XXXXXXXXXXXXX
         $window.scrollTo 0, 0
 
     doSearch()

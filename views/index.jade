@@ -31,9 +31,8 @@ html(ng-app='aspen')
 
     div(ng-show='query').container
 
-      div(ng-show='error != null && !inProgress').alert.alert-danger
-        p: strong An error occurred -- you should <a href="mailto:ian@langworth.com">contact Ian</a>:
-        p.json {{ error }}
+      div(ng-show='error != null').alert.alert-danger
+        p.json Error: {{ error }}
 
       p(ng-show='inProgress').text-success
         span.fa.fa-spin.fa-circle-o-notch
@@ -66,7 +65,11 @@ html(ng-app='aspen')
 
     div.container
       div.well
-        strong Examples:
+        strong Notes:
+        br
+        | "Sloppy" will search over page breaks but is less accurate.
+        br
+        | Capitalization doesn't count except for <code>AND</code> and <code>OR</code>
         br
         | Must contain "chartwell" and either "jock" or "sarah": &nbsp;
         code chartwell (jock OR sarah)
@@ -77,12 +80,6 @@ html(ng-app='aspen')
         | Must contain the exact phrase, "i would drink it": &nbsp;
         code "i would drink it"
         br
-        | Check "Sloppy" and search for
-        code "outside and inside meet so easily"
-        | to search over page breaks
-        br
-        em Note: &nbsp;
-        | Capitalization doesn't count except for <code>AND</code> and <code>OR</code>
 
   div(id='viewer', ng-controller='FileViewController').modal
     div.modal-dialog.modal-lg
@@ -103,8 +100,7 @@ html(ng-app='aspen')
             span.fa.fa-spin.fa-circle-o-notch
 
           div(ng-show='error != null && !inProgress').alert.alert-danger
-            p: strong An error occurred:
-            p.json {{ error }}
+            p.json Error: {{ error }}
 
           div(ng-show='!inProgress && !error')
             p: div(ng-show='locations.length').btn-group
