@@ -1,45 +1,29 @@
 # Aspen
 
-A quick-and-dirty example of Solr + Node + Express + Angular.
+A quick-and-dirty example of Elasticsearch + Node + Express + Angular.
 
 This expects lots of content to be symlinked in `static/data`.
 
 ## Getting Started
 
+First, download the Elasticsearch zip from http://www.elasticsearch.org/download/ -- currently supported version is 1.4.1 -- then unzip it in to this directory.
+
+Then,
+
     $ npm install -g bower
     $ npm install
     $ bower install
-    $ ln -s ../solr-4.9.0 solr-dist
     $ ln -s ../data static/data
-    $ npm run solr-dev &
-    $ ./import.coffee solr
+    $ ln -s elasticsearch-1.4.1 elasticsearch-dist
+    $ npm run es-dev &
+    $ ./import.coffee es-reset
+    $ ./import.coffee es
 
 ## Plaintext Only
 
 Only plaintext documents are supported. To convert a MSWord doc or PDF to plaintext, install [Apache Tika](http://tika.apache.org/) and [par](http://www.nicemice.net/par/) and run `convert.sh`.
 
-## Commands
-
-- Dev solr start
-
-    $ npm run solr-dev
-
-- Dev server
-
-    $ npm run web-dev
-
-- Manual file import
-
-    $ cd static/data/
-    $ x=path/to/file.pdf ; curl "http://localhost:8983/solr/update/extract?literal.id=$x&literal.url=$x&commit=true" -F "myfile=@$x"
-
-## Example Solr Query
-
-* http://localhost:8983/solr/query?q=jock&fl=id,title,url&hl=true&hl.fl=content,title&hl.fragsize=300&hl.snippets=3&hl.mergeContiguous=true
-
 ## Links
 
-* Main Solr wiki: https://cwiki.apache.org/confluence/display/solr/
-* Extended DisMax Query Parser: https://cwiki.apache.org/confluence/display/solr/The+Extended+DisMax+Query+Parser
-* Postings Highlighter: https://cwiki.apache.org/confluence/display/solr/Postings+Highlighter
+* [Elasticsearch Guide](http://www.elasticsearch.org/guide/)
 * Michael Bromley's [angularUtils](https://github.com/michaelbromley/angularUtils) for its Angular pagination directive
