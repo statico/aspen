@@ -1,0 +1,39 @@
+doctype html
+html(ng-app='aspen')
+  head
+    title Search Test Page
+    meta(charset='utf-8')
+    meta(name='robots', content='noindex, nofollow')
+
+    // Begin Bower Stylesheets
+    link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/bower_components/fontawesome/css/font-awesome.min.css')
+    // End Bower Stylesheets
+
+    link(rel='stylesheet', href='/main.css')
+
+  body.test
+
+    div(ng-controller='TestController', ng-include='"results.html"', ng-init="init('\"it is rare\"')")
+    div(ng-controller='TestController', ng-include='"results.html"', ng-init="init('mayor of liepaja')")
+    div(ng-controller='TestController', ng-include='"results.html"', ng-init="init('\"western civilization\"')")
+    div(ng-controller='TestController', ng-include='"results.html"', ng-init="init('\"pit in which Western civilization might be fatally engulfed\"')")
+
+    script(type='text/ng-template', id='results.html')
+      h4 {{ query }}
+      p {{ results.length }} results
+      div(ng-repeat='result in results')
+        strong {{ result.url }}
+        br
+        span(ng-bind-html='result.snippet')
+
+  // Begin Bower JavaScript
+  script(src='/bower_components/jquery/dist/jquery.min.js')
+  script(src='/bower_components/angular/angular.js')
+  script(src='/bower_components/angular-route/angular-route.js')
+  script(src='/bower_components/angular-sanitize/angular-sanitize.js')
+  script(src='/bower_components/angular-utils-pagination/dirPagination.js')
+  // End Bower JavaScript
+
+  script(src='/main.js')
+

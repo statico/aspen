@@ -38,9 +38,14 @@ app.get '/', (req, res) ->
   else
     res.render 'index'
 
+app.get '/test', (req, res) ->
+  res.render 'test'
+
 # RPCs ----------------------------------------------------------------------
 
 app.get '/query', (req, res) ->
+  res.status(400).send('Missing q parameter') unless req.query.q
+
   # Chrome+Angular caches this.
   res.header 'Cache-Control', 'no-cache'
 

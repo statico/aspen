@@ -26,8 +26,6 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
         slop = if slop then 1 else null
         $http.get('/query', params: { q: query, page: page - 1, slop: slop })
           .success (data) ->
-            if not data.response?.numFound?
-              cb JSON.stringify data, null, '  '
             cb null, data
           .error (data) ->
             if data?.error
@@ -46,6 +44,22 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
           else
             element.blur()
     }
+
+  .controller 'TestController', (server, $sce, $scope) ->
+    $scope.init = (query) ->
+      $scope.query = query
+      server.query query, 1, false, (err, data) ->
+        return console.error "Error: #{ err }" if err
+        $scope.results = []
+        for obj in data.hits.hits
+          highlight = obj.highlight?.text ? obj.highlight?['text.english']
+          $scope.results.push {
+            id: obj._id
+            url: "#{ DATA_BASEURL }/#{ obj._source.path }"
+            title: obj._source.title ? obj._source.path
+            snippet: $sce.trustAsHtml(highlight?.join ' ... ')
+            score: obj._score
+          }
 
   .controller 'MainController', (server, utils, $rootScope, $scope, $sce, $location, $window) ->
 

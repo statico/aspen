@@ -84,3 +84,11 @@ label {
   font-weight: normal;
   cursor: pointer;
 }
+
+body.test {
+  display: flex;
+  font: 12px/1.2 sans-serif;
+  strong { word-break: break-all; }
+  & > div { padding: 5px; flex: 1; }
+  em { color: #b00; font-weight: bold; font-style: normal; }
+}
