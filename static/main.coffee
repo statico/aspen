@@ -137,7 +137,6 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
 
         for obj in data.hits.hits
           highlight = obj.highlight?.text ? obj.highlight?['text.english']
-          console.log 'XXX', highlight
           $scope.results.push {
             id: obj._id
             url: "#{ DATA_BASEURL }/#{ obj._source.path }"
