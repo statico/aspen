@@ -1,12 +1,9 @@
 bower_components
-elasticsearch-data
+elasticsearch-*
 elasticsearch.yml
 env
 logs
 node_modules
 npm-debug.log
-solr-dist
-solr-home/collection1/data
-solr-webapp
 static/data
 velocity.log

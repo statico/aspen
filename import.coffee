@@ -7,7 +7,6 @@ pathlib = require 'path'
 
 require('./lib/localenv').init __dirname
 
-{solrUpload, solrClearAll, solrClearQuery} = require './lib/solr'
 {esUpload, esReset} = require './lib/elasticsearch'
 {walk} = require './lib/walker'
 {extractTitle} = require './lib/plaintext'
@@ -15,48 +14,7 @@ require('./lib/localenv').init __dirname
 commander
   .version('0.0.1')
   .option('-d, --basedir <path>', 'Set the path to static/data/', __dirname + '/static/data')
-  .option('-c, --concurrency <n>', 'Limit solr indexing to this many docs at once', Infinity)
-
-commander
-  .command('solr [subdirs...]')
-  .description('Index static/data/ (or a subdir) into Solr')
-  .action (subdirs) ->
-    {basedir, concurrency} = commander
-
-    indexfn = ({relpath, fullpath}, done) ->
-      extractTitle fullpath, (title) ->
-        solrUpload basedir, fullpath, title, (err) ->
-          if err
-            console.error "✗ ".red, err
-          else
-            console.log "✓ ".green, "#{ relpath } -> '#{ title }'"
-        done()
-
-    queue = async.queue indexfn, concurrency
-
-    walkfn = (relpath, fullpath) ->
-      queue.push {relpath: relpath, fullpath: fullpath}, (err) ->
-        console.error "Couldn't push to queue: #{ err }".red if err
-
-    if subdirs.length
-      for dir in subdirs
-        walk basedir, dir, walkfn
-    else
-      walk basedir, walkfn
-
-commander
-  .command('solr-clear <query>')
-  .description('Clears some documents from Solr, like "RML/*"')
-  .action (query) ->
-    solrClearQuery query, (err, res, body) ->
-      console.log "✓ ".green, "Done."
-
-commander
-  .command('solr-clearall')
-  .description('Empty the Solr database')
-  .action ->
-    solrClearAll ->
-      console.log "✓ ".green, "Done."
+  .option('-c, --concurrency <n>', 'Limit indexing to this many docs at once', Infinity)
 
 commander
   .command('es [subdirs...]')
