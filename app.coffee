@@ -54,6 +54,10 @@ app.get '/query', (req, res) ->
     .replace(/“|”/g, '"')
     .replace(/‘|’/g, "'")
 
+  # Escape backslashes. Nobody is going to use regex searching; it's more useful to be able to
+  # search the path: field easily.
+  query = query.replace /\//g, '\\/'
+
   # Run the query twice. Get full highlight data first (but that's huge, so don't send it to the
   # user), then use that data to annotate the data the client gets. Basically, this:
   # http://stackoverflow.com/q/15072806/102704 and http://stackoverflow.com/q/4512656/102704
