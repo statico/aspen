@@ -8,7 +8,7 @@
     "web-dev": "nodemon -e coffee -x coffee -w app.coffee app.coffee",
     "es-dev": "./elasticsearch-dist/bin/elasticsearch --config=elasticsearch.yml",
     "web-prod": "NODE_ENV=production coffee app.coffee",
-    "es-prod": "JAVA_OPTS='-Xms512m -Xmx512m -server' ./elasticsearch-dist/bin/elasticsearch --config=elasticsearch.yml",
+    "es-prod": "JAVA_OPTS='-server' ./elasticsearch-dist/bin/elasticsearch --config=elasticsearch.yml",
     "syncup": "rsync -azv -e ssh --delete --progress static/data/ lemon:wsc/data/",
     "syncdown": "rsync -azv -e ssh --delete --progress lemon:wsc/data/ static/data/"
   },
