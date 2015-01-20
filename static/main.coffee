@@ -132,7 +132,7 @@ angular.module('aspen', ['ngSanitize', 'ngRoute', 'angularUtils.directives.dirPa
           f: $scope.filename
           slop: if $scope.slop then 1 else null
 
-        if err
+        if err and not /Missing q parameter/.test err
           $scope.error = err
           $scope.results = []
           $scope.totalItems = 0
