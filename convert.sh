@@ -19,6 +19,7 @@ for src in "$@" ; do
     echo -n "Creating $dest..."
     if [ "${src##*.}" == "rtf" ]; then
       unrtf --text "$src" | iconv -t utf-8 -c | par > "$dest"
+      echo "OK"
     else
       (
         echo '---'
@@ -28,8 +29,9 @@ for src in "$@" ; do
         tika -t "$src" | par
       ) >"$tempfile"
       ./node_modules/coffee-script/bin/coffee fixup.coffee "$tempfile" >"$dest"
+      echo "OK"
+      echo -e "\t$( cat "$dest" | grep -Ei '^dc:title' | cut -d\  -f2- )"
     fi
-    echo "OK"
   else
     echo "Not a file: $src"
   fi

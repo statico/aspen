@@ -19,18 +19,24 @@ exports.extractTitle = (path, cb) ->
   if match = path.match /FinestHour\/No\.(\d+)\.txt$/
     return cb "Finest Hour No. #{ Number match[1] } (plaintext)"
 
-  # Old-school text files where the top line is like:
-  # @@Addison, Home Front, p. 200
+  # New tika-converted titles with metadata *and* old-school text files where
+  # the top line is like: "@@Addison, Home Front, p. 200"
   first = null
-  match = /^(.*(@@|TITLE:)|JOURNAL OF THE CHURCHILL CENTRE|FINEST HOUR)/
+  pattern = /^(.*(@@|TITLE:)|JOURNAL OF THE CHURCHILL CENTRE|FINEST HOUR)/
   strip = /^.*(@@|TITLE:\s+)/
 
   lineReader.eachLine path, (line, last) ->
+
+    # New metadata from convert.sh and tika.
+    if match = line.match /^dc:title:\s*(.*)/
+      cb match[1]
+      return false
+
     return true if /^### /.test line # Ignore UnRTF messages.
 
     first ?= line
 
-    if match.test line
+    if pattern.test line
       cb line.replace(strip, '')
       return false
 
