@@ -5,8 +5,11 @@
 # Requires Apache Tika, unrtf and par. (Tika sucks at RTF->text.)
 # On Mac OS X, `brew install tika unrtf par`
 
-set -ex
+set -e
 shopt -s nocasematch
+
+tempfile=`mktemp -t convert`
+trap "rm -f $tempfile" EXIT
 
 for src in "$@" ; do
   dest="${src%%.*}.txt"
@@ -17,7 +20,14 @@ for src in "$@" ; do
     if [ "${src##*.}" == "rtf" ]; then
       unrtf --text "$src" | iconv -t utf-8 -c | par > "$dest"
     else
-      tika -t "$src" | par > "$dest"
+      (
+        echo '---'
+        tika -m "$src"
+        echo '---'
+        echo
+        tika -t "$src" | par
+      ) >"$tempfile"
+      ./node_modules/coffee-script/bin/coffee fixup.coffee "$tempfile" >"$dest"
     fi
     echo "OK"
   else
