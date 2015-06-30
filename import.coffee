@@ -46,6 +46,7 @@ commander
         else
           relpath = pathlib.relative basedir, path
           fullpath = pathlib.resolve basedir, path
+          queue.push {relpath: relpath, fullpath: fullpath}
     else
       walk basedir, walkfn
 
