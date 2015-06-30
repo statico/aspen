@@ -3,6 +3,7 @@
 async = require 'async'
 colors = require 'colors'
 commander = require 'commander'
+fs = require 'fs'
 pathlib = require 'path'
 
 require('./lib/localenv').init __dirname
@@ -39,7 +40,12 @@ commander
 
     if subdirs.length
       for dir in subdirs
-        walk basedir, dir, walkfn
+        path = pathlib.join basedir, dir
+        if fs.statSync(path).isDirectory()
+          walk basedir, dir, walkfn
+        else
+          relpath = pathlib.relative basedir, path
+          fullpath = pathlib.resolve basedir, path
     else
       walk basedir, walkfn
 
