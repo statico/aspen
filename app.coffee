@@ -44,7 +44,9 @@ app.get '/test', (req, res) ->
 # RPCs ----------------------------------------------------------------------
 
 app.get '/query', (req, res) ->
-  res.status(400).send('Missing q parameter') unless req.query.q
+  if not req.query.q
+    res.status(400).send('Missing q parameter')
+    return
 
   # Chrome+Angular caches this.
   res.header 'Cache-Control', 'no-cache'
