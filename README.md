@@ -27,3 +27,16 @@ Only plaintext documents are supported. To convert a MSWord doc or PDF to plaint
 
 * [Elasticsearch Guide](http://www.elasticsearch.org/guide/)
 * Michael Bromley's [angularUtils](https://github.com/michaelbromley/angularUtils) for its Angular pagination directive
+
+## Maintenance
+
+### Adding a new book
+
+1. Locally...
+    1. Copy the docx to static/data
+    1. `./convert.sh static/data/Hillsdale/Foo.docx`
+    1. `npm run syncup`
+1. Remotely...
+    1. `import.coffee es Hillsdale/Foo.txt`
+
+
