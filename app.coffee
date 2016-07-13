@@ -123,6 +123,7 @@ app.get '/query', (req, res) ->
     # Second pass: what we annotate and send to the client.
     obj2 = buildQueryObject false
     esQuery obj2, (err, _, body) ->
+      return res.status(500).json { error: err } if err
 
       # Add query time to the total.
       body.took += meta.took
