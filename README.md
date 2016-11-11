@@ -65,13 +65,13 @@ $ docker run -it --rm --net=aspen -v ~/ebooks:/aspen/static/data statico/aspen e
 This imports everything in `static/data/` and is idempotent:
 
 ```
-$ docker run -it --rm -v --net=aspen ~/ebooks:/aspen/static/data statico/aspen import
+$ docker run -it --rm --net=aspen -v ~/ebooks:/aspen/static/data statico/aspen import
 ```
 
 Alternatively, to only import a single folder or document, pass the filename relative to `static/data/`:
 
 ```
-$ docker run -it --rm -v --net=aspen ~/ebooks:/aspen/static/data statico/aspen import SomeFolder/Something.txt
+$ docker run -it --rm --net=aspen -v ~/ebooks:/aspen/static/data statico/aspen import SomeFolder/Something.txt
 ```
 
 **Getting queue size errors from Elasticsearch?** Try setting the import concurrency to something lower, like `import -c 1`.
