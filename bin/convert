@@ -8,7 +8,7 @@
 set -e
 shopt -s nocasematch
 
-tempfile=`mktemp -t convert`
+tempfile=`mktemp -t convertXXXXXX`
 trap "rm -f $tempfile" EXIT
 
 for src in "$@" ; do
@@ -28,7 +28,7 @@ for src in "$@" ; do
         echo
         tika -t "$src" | par
       ) >"$tempfile"
-      ./node_modules/coffee-script/bin/coffee fixup.coffee "$tempfile" >"$dest"
+      ./node_modules/coffee-script/bin/coffee $(dirname $0)/fixup "$tempfile" >"$dest"
       echo "OK"
       echo -e "\t$( cat "$dest" | grep -Ei '^dc:title' | cut -d\  -f2- )"
     fi

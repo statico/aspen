@@ -8,7 +8,7 @@ commander = require 'commander'
 commander
   .version('0.0.1')
   .usage('[options] <filename>')
-  .option('-w, --wordlist <path>', 'Path to English wordlist', __dirname + '/words.txt')
+  .option('-w, --wordlist <path>', 'Path to English wordlist', __dirname + '/../words.txt')
 
 commander.parse process.argv
 commander.help() unless commander.args.length is 1

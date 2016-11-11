@@ -12,8 +12,6 @@ request = require 'request'
 pathlib = require 'path'
 serveIndex = require 'serve-index'
 
-require('./lib/localenv').init __dirname
-
 {esQuery} =  require './lib/elasticsearch'
 
 MAX_DOCUMENT_CHARACTERS = 4e8

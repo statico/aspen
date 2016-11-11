@@ -1,9 +1,4 @@
 bower_components
-elasticsearch-*
-elasticsearch.yml
-env
-logs
 node_modules
 npm-debug.log
 static/data
-velocity.log

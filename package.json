@@ -1,14 +1,11 @@
 {
   "name": "aspen",
   "version": "0.0.1",
-  "description": "Private search engine for historical documents",
+  "description": "Search engine for a large corpus of plaintext documents",
   "repository": "git@github.com:statico/aspen.git",
   "private": true,
   "scripts": {
-    "web-dev": "nodemon -e coffee -x coffee -w app.coffee app.coffee",
-    "es-dev": "./elasticsearch-dist/bin/elasticsearch --config=elasticsearch.yml",
-    "web-prod": "NODE_ENV=production coffee app.coffee",
-    "es-prod": "JAVA_OPTS='-server' ./elasticsearch-dist/bin/elasticsearch --config=elasticsearch.yml",
+    "web": "coffee app.coffee",
     "syncup": "rsync -azv -e ssh --progress static/data/ lemon:wsc/data/",
     "syncdown": "rsync -azv -e ssh --progress lemon:wsc/data/ static/data/"
   },

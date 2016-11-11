@@ -1,0 +1,49 @@
+#!/usr/bin/env coffee
+
+async = require 'async'
+colors = require 'colors'
+commander = require 'commander'
+fs = require 'fs'
+pathlib = require 'path'
+
+{esUpload, esReset} = require '../lib/elasticsearch'
+{walk} = require '../lib/walker'
+{extractTitle} = require '../lib/plaintext'
+
+commander
+  .version('0.0.1')
+  .usage('<subdirs ...>')
+  .option('-d, --basedir <path>', 'Set the path to static/data/', __dirname + '/../static/data')
+  .option('-c, --concurrency <n>', 'Limit indexing to this many docs at once', 5)
+  .parse(process.argv)
+
+{basedir, concurrency} = commander
+subdirs = commander.args
+
+indexfn = ({relpath, fullpath}, done) ->
+  extractTitle fullpath, (title) ->
+    esUpload basedir, fullpath, title, (err) ->
+      if err
+        console.error "✗ ".red, err
+      else
+        console.log "✓ ".green, "#{ relpath }", "-> #{ title }".bold.blue
+      done()
+
+queue = async.queue indexfn, concurrency
+
+walkfn = (relpath, fullpath) ->
+  queue.push {relpath: relpath, fullpath: fullpath}, (err) ->
+    console.error "Couldn't push to queue: #{ err }".red if err
+
+if subdirs.length
+  for dir in subdirs
+    path = pathlib.join basedir, dir
+    if fs.statSync(path).isDirectory()
+      walk basedir, dir, walkfn
+    else
+      relpath = pathlib.relative basedir, path
+      fullpath = pathlib.resolve basedir, path
+      queue.push {relpath: relpath, fullpath: fullpath}
+else
+  walk basedir, walkfn
+
