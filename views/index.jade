@@ -17,7 +17,7 @@ html(ng-app='aspen')
     div.topnav
       div.container
         form
-          a(href="/"): img(src='/wsc.jpg').wsc.item
+          a(href="/"): img(src='/dodge-aspen.png').logo.item
           label(for='query').lead.item.hidden-xs Aspen 2.0
           input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()', focus-if="!filename").item
           button(ng-click='onSearchButtonClicked()').btn.btn-primary.item
@@ -65,23 +65,23 @@ html(ng-app='aspen')
 
     div.container
       div.well
-        strong Notes:
+        strong Quick Help
         br
-        | "Sloppy" will search over page breaks but is less accurate.
+        | "Sloppy" checkbox will search over page breaks but is less accurate.
         br
         | Capitalization doesn't count except for <code>AND</code> and <code>OR</code>
         br
-        | Must contain "chartwell" and either "jock" or "sarah": &nbsp;
-        code chartwell (jock OR sarah)
+        | Must contain "foo" and either "bar" or "quux": &nbsp;
+        code foo (bar OR quux)
         br
-        | Must contain "soviets" but not "britain": &nbsp;
-        code soviets -britain
+        | Must contain "foo" but not "bar": &nbsp;
+        code foo -bar
         br
-        | Must contain the exact phrase, "i would drink it": &nbsp;
-        code "i would drink it"
+        | Must contain the exact phrase, "the quick brown fox": &nbsp;
+        code "the quick brown fox"
         br
-        | Search for Chartwell but only in the official biography companion, volume 5: &nbsp;
-        code path:"OfficialBiographyComp/5" chartwell
+        | Search for foo but only in a certain folder: &nbsp;
+        code path:"SomeFolder/5" foo
         br
 
   div(id='viewer', ng-controller='FileViewController').modal
