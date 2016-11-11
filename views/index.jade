@@ -18,7 +18,7 @@ html(ng-app='aspen')
       div.container
         form
           a(href="/"): img(src='/dodge-aspen.png').logo.item
-          label(for='query').lead.item.hidden-xs Aspen 2.0
+          label(for='query').lead.item.hidden-xs Aspen
           input(id='query', type='text', ng-model='query', ng-keydown='onSearchKeyDown()', focus-if="!filename").item
           button(ng-click='onSearchButtonClicked()').btn.btn-primary.item
             span.hidden-xs Search

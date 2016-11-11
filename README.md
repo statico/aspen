@@ -7,6 +7,8 @@
 - Responsive UI that works on mobile
 - Runs in Docker
 
+[![example](http://imgur.com/vvopYzB.gif)](http://imgur.com/vvopYzB)
+
 ## Getting Started
 
 ### 1. Symlink your documents directory into static/data
