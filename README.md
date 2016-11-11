@@ -32,9 +32,9 @@ Only plaintext documents are supported. To convert a MSWord doc or PDF to plaint
 
 ```
 $ docker network create aspen
-$ docker run --name aspen -d --net=aspen -p 8900:8080 \
+$ docker run --name aspen -d --restart=always --net=aspen -p 8900:8080 \
     -v ~/data/ebooks:/aspen/static/data statico/aspen
-$ docker run --name elasticsearch -d --net=aspen -e "JAVA_OPTS=-server" \
+$ docker run --name elasticsearch -d --restart=always --net=aspen -e "JAVA_OPTS=-server" \
     -v ~/data/esdata:/usr/share/elasticsearch/data \
     -v ~/data/esconfig:/usr/share/elasticsearch/config \
     elasticsearch:1.4 --config=config/basic.yml
