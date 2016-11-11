@@ -28,6 +28,18 @@ Only plaintext documents are supported. To convert a MSWord doc or PDF to plaint
 * [Elasticsearch Guide](http://www.elasticsearch.org/guide/)
 * Michael Bromley's [angularUtils](https://github.com/michaelbromley/angularUtils) for its Angular pagination directive
 
+## Production Use
+
+```
+$ docker network create aspen
+$ docker run --name aspen -d --net=aspen -p 8900:8080 \
+    -v ~/data/ebooks:/aspen/static/data statico/aspen
+$ docker run --name elasticsearch -d --net=aspen \
+    -v ~/data/esdata:/usr/share/elasticsearch/data \
+    -v ~/data/esconfig:/usr/share/elasticsearch/config \
+    elasticsearch:1.4 --config=config/basic.yml
+```
+
 ## Maintenance
 
 ### Adding a new book
