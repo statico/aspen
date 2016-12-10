@@ -6,8 +6,8 @@
   "private": true,
   "scripts": {
     "web": "coffee app.coffee",
-    "syncup": "rsync -azv -e ssh --progress static/data/ lemon:wsc/data/",
-    "syncdown": "rsync -azv -e ssh --progress lemon:wsc/data/ static/data/"
+    "syncup": "rsync -azv -e ssh --progress static/data/ lemon:data/ebooks/",
+    "syncdown": "rsync -azv -e ssh --progress lemon:data/ebooks/ static/data/"
   },
   "author": "Ian Langworth",
   "license": "MIT",
