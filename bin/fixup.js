@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+//
+// Fixes up text after a scan.
+
+const fs = require('fs');
+const commander = require('commander');
+
+commander
+  .version('0.0.1')
+  .usage('[options] <filename>')
+  .option('-w, --wordlist <path>', 'Path to English wordlist', __dirname + '/../words.txt');
+
+commander.parse(process.argv);
+if (commander.args.length !== 1) { commander.help(); }
+
+const words = {};
+for (var word of Array.from(fs.readFileSync(commander.wordlist, 'utf8').split('\n'))) {
+  words[word] = true;
+}
+
+const contents = fs.readFileSync(commander.args[0], 'utf8');
+const lines = contents.split('\n');
+for (let i = 0; i < lines.length; i++) {
+
+  // Fix trailing garbage.
+  let line = lines[i];
+  line = line.replace(/\s+\.$/, '');
+
+  // Fix weird scans which broke up words like "under<0xC2><0xAD>  stand"
+  line = line.replace(/(\w+)[\s\xC2\xAD]{2,}(\w+)/g, function(whole, a, b) {
+    word = a + b;
+    if (word.toLowerCase() in words) {
+      return word;
+    } else {
+      return whole;
+    }
+  });
+
+  lines[i] = line;
+}
+
+console.log(lines.join('\n'));

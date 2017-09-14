@@ -1,7 +1,0 @@
-#!/usr/bin/env coffee
-
-colors = require 'colors'
-{esReset} = require '../lib/elasticsearch'
-
-esReset ->
-  console.log "✓ ".green, "Done."
