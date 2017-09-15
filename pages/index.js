@@ -21,15 +21,28 @@ export default class Index extends React.Component {
     super(props)
     this.state = { query: props.query }
     this.handleChange = this.handleChange.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
   }
 
-  onComponentDidMount () {
+  componentDidMount () {
     this.doSearch()
+  }
+
+  handleChange (event) {
+    this.setState({ query: event.target.value })
+    clearTimeout(this.timer)
+    this.timer = setTimeout(() => { this.doSearch() }, 500)
+  }
+
+  handleSubmit (event) {
+    this.setState({ query: this.input.value })
+    clearTimeout(this.timer)
+    this.doSearch()
+    event.preventDefault()
   }
 
   async doSearch () {
     let { query } = this.state
-    console.log('XXX', query)
     if (query != null) {
       let response = await fetch(getOrigin() + '/query?q=' + encodeURIComponent(query))
       let results = await response.json()
@@ -37,11 +50,6 @@ export default class Index extends React.Component {
     } else {
       this.setState({ results: null })
     }
-  }
-
-  handleChange (event) {
-    this.setState({ query: event.target.value })
-    this.doSearch()
   }
 
   render () {
@@ -73,7 +81,7 @@ export default class Index extends React.Component {
           img { width: 100px; }
         `}</style>
 
-      <form>
+      <form onSubmit={this.handleSubmit}>
         <a href="/">
           <img src="/static/dodge-aspen.png"/>
           <label htmlFor="query" className="lead hidden-xs">Aspen</label>
