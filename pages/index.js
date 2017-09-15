@@ -2,19 +2,29 @@ import Head from 'next/head'
 import React from 'react'
 import fetch from 'isomorphic-unfetch'
 
+function getOrigin () {
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname, port } = window.location
+    return `${protocol}//${hostname}${port ? ':' + port : ''}`
+  } else {
+    return `http://localhost:${process.env.PORT || 3000}`
+  }
+}
+
 export default class Index extends React.Component {
 
   static async getInitialProps ({ req }) {
     let query = req.query.q
-    return query // XXXXXx
+    let results
     if (query != null) {
-      results = await fetch('/query')
+      let res = await fetch(getOrigin() + '/query')
+      results = await res.json()
     }
     return { query, results }
   }
 
   render () {
-    let { query } = this.props
+    let { query, results } = this.props
     return (
     <div>
 
@@ -63,7 +73,7 @@ export default class Index extends React.Component {
       </div>
 
       <div className="container results">
-
+        <pre>{JSON.stringify(results, null, '  ')}</pre>
       </div>
 
     </div>
