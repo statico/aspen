@@ -14,29 +14,49 @@ function getOrigin () {
 export default class Index extends React.Component {
 
   static async getInitialProps ({ req }) {
-    let query = req.query.q
-    let results
+    return { query: req.query.q }
+  }
+
+  constructor (props) {
+    super(props)
+    this.state = { query: props.query }
+    this.handleChange = this.handleChange.bind(this)
+  }
+
+  onComponentDidMount () {
+    this.doSearch()
+  }
+
+  async doSearch () {
+    let { query } = this.state
+    console.log('XXX', query)
     if (query != null) {
-      let res = await fetch(getOrigin() + '/query')
-      results = await res.json()
+      let response = await fetch(getOrigin() + '/query?q=' + encodeURIComponent(query))
+      let results = await response.json()
+      this.setState({ results: results })
+    } else {
+      this.setState({ results: null })
     }
-    return { query, results }
+  }
+
+  handleChange (event) {
+    this.setState({ query: event.target.value })
+    this.doSearch()
   }
 
   render () {
-    let { query, results } = this.props
     return (
-    <div>
+      <div>
 
-      <Head>
-        <title>Aspen</title>
-        <meta name="robots" content="noindex, nofollow"/>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
-      </Head>
+        <Head>
+          <title>Aspen</title>
+          <meta name="robots" content="noindex, nofollow"/>
+          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+        </Head>
 
-      <div className="container">
-        <style jsx>{`
+        <div className="container">
+          <style jsx>{`
           background: #eee;
           padding: 1em 0;
           margin-bottom: 1em;
@@ -53,30 +73,34 @@ export default class Index extends React.Component {
           img { width: 100px; }
         `}</style>
 
-        <form>
-          <a href="/">
-            <img src="/static/dodge-aspen.png"/>
-            <label htmlFor="query" className="lead hidden-xs">Aspen</label>
-            <input id="query" type="text" value={query == null ? '' : query}/>
-          </a>
-          <button className="btn btn-primary">
-            <span className="hidden-xs">Search</span>
-            <span className="visible-xs fa fa-search fa-reverse"/>
-          </button>
-          <span className="nowrap">
-            <input id="slop" type="checkbox"/>
-            <label htmlFor="slop" className="hidden-xs">Sloppy</label>
-            <label htmlFor="slop" className="visible-xs-inline">S</label>
-          </span>
-        </form>
-
-      </div>
-
-      <div className="container results">
-        <pre>{JSON.stringify(results, null, '  ')}</pre>
-      </div>
+      <form>
+        <a href="/">
+          <img src="/static/dodge-aspen.png"/>
+          <label htmlFor="query" className="lead hidden-xs">Aspen</label>
+        </a>
+        <input id="query" type="text" autoFocus
+          value={this.state.query == null ? '' : this.state.query}
+          ref={(input) => { this.input = input }}
+          onChange={this.handleChange}
+        />
+        <button className="btn btn-primary">
+          <span className="hidden-xs">Search</span>
+          <span className="visible-xs fa fa-search fa-reverse"/>
+        </button>
+        <span className="nowrap">
+          <input id="slop" type="checkbox"/>
+          <label htmlFor="slop" className="hidden-xs">Sloppy</label>
+          <label htmlFor="slop" className="visible-xs-inline">S</label>
+        </span>
+      </form>
 
     </div>
+
+    <div className="container results">
+      <pre>{JSON.stringify(this.state.results, null, '  ')}</pre>
+    </div>
+
+  </div>
     )
   }
 }

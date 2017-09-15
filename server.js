@@ -11,6 +11,7 @@ async function main () {
   const server = express()
 
   server.get('/query', (req, res) => {
+    let q = req.query.q
     res.json({
       timed_out: false,
       took: 123,
@@ -20,7 +21,7 @@ async function main () {
         hits: [
           {
             highlight: {
-              text: ["foo", "bar", "baz"],
+              text: ["foo"+q, "bar"+q, "baz"+q],
               "text.english": ["foo", "bar", "baz"],
             },
             highlight_locations: [
@@ -32,7 +33,7 @@ async function main () {
             _type: 'file',
             _source: {
               path: "honk/blat.txt",
-              title: "Sample Result"
+              title: "Sample Result "+q
             }
           }
         ]
