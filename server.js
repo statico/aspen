@@ -6,43 +6,29 @@ const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const handle = app.getRequestHandler()
 
+const { search } = require('./lib/elasticsearch')
+
 async function main () {
   await app.prepare()
   const server = express()
 
-  server.get('/query', (req, res) => {
-    let q = req.query.q
-    res.json({
-      timed_out: false,
-      took: 123,
-      hits: {
-        total: 48,
-        max_score: 0.012345,
-        hits: [
-          {
-            highlight: {
-              text: ["foo"+q, "bar"+q, "baz"+q],
-              "text.english": ["foo", "bar", "baz"],
-            },
-            highlight_locations: [
-              [0,2], [0,2], [0,2]
-            ],
-            _id: '190831028302983091830982',
-            _index: 'aspen',
-            _score: 0.012345,
-            _type: 'file',
-            _source: {
-              path: "honk/blat.txt",
-              title: "Sample Result "+q
-            }
-          }
-        ]
-      }
-    })
+  server.get('/search', async (req, res) => {
+    res.header('Cache-Control', 'no-cache')
+    let query = req.query.query
+    let page = Number(req.query.page) || 0
+    let sloppy = !!req.query.sloppy
+    let results
+    try {
+      results = await search(query, page, sloppy)
+    } catch (err) {
+      console.error(`Error while searching for "${query}": ${err.stack}`)
+      results = { error: `Error: ${err}` }
+    }
+    res.json(results)
   })
 
   server.get('*', (req, res) => {
-    const params = { q: req.params.q }
+    const params = { q: req.query.q }
     return handle(req, res, null, params)
   })
 

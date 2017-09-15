@@ -19,7 +19,11 @@ export default class Index extends React.Component {
 
   constructor (props) {
     super(props)
-    this.state = { query: props.query }
+    this.state = {
+      query: props.query,
+      results: null,
+      inProgress: false
+    }
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
   }
@@ -44,7 +48,8 @@ export default class Index extends React.Component {
   async doSearch () {
     let { query } = this.state
     if (query != null) {
-      let response = await fetch(getOrigin() + '/query?q=' + encodeURIComponent(query))
+      // XXX need page, sloppy
+      let response = await fetch(getOrigin() + '/search?query=' + encodeURIComponent(query))
       let results = await response.json()
       this.setState({ results: results })
     } else {
@@ -53,6 +58,7 @@ export default class Index extends React.Component {
   }
 
   render () {
+    let { query, results, inProgress } = this.state
     return (
       <div>
 
@@ -87,7 +93,7 @@ export default class Index extends React.Component {
           <label htmlFor="query" className="lead hidden-xs">Aspen</label>
         </a>
         <input id="query" type="text" autoFocus
-          value={this.state.query == null ? '' : this.state.query}
+          value={query == null ? '' : query}
           ref={(input) => { this.input = input }}
           onChange={this.handleChange}
         />
@@ -104,9 +110,32 @@ export default class Index extends React.Component {
 
     </div>
 
-    <div className="container results">
+    {query && <div>
+
+      {results.error && <div className="alert alert-danger">
+        Error: {results.error}
+      </div>}
+
+      {inProgress && <div className="text-success">
+        <span className="fa fa-spin fa-circle-o-notch"/>
+      </div>}
+
+      {!inProgress && results.totalItems && <div className="text-success">
+        {results.TotalItems} results found.
+        Page {results.currentPage} of {results.totalPages}.
+      </div>}
+
+      {!inProgress && !results.totalPages && <div className="text-danger">
+        0 results found.
+      </div>}
+
+    </div>}
+
+    {results && results.length && <div className="container results">
+
       <pre>{JSON.stringify(this.state.results, null, '  ')}</pre>
-    </div>
+
+    </div>}
 
   </div>
     )

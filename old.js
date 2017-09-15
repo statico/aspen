@@ -22,7 +22,6 @@ const serveIndex = require('serve-index');
 const {esQuery} =  require('./lib/elasticsearch');
 
 const MAX_DOCUMENT_CHARACTERS = 4e8;
-const ITEMS_PER_PAGE = 10;
 const STATIC_BASEDIR = pathlib.join(__dirname, 'static');
 
 const app = express();
