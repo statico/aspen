@@ -107,23 +107,38 @@ export default class Index extends React.Component {
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
       </Head>
 
-      <div className="container">
-        <style jsx>{`
+      <style global jsx>{`
+        body {
+          background: #fafafa;
+          color: #111;
+          font-family: Georgia, serif;
+          font-size: 16px;
+        }
+        a {
+          cursor: pointer;
+          color: #00e;
+        }
+      `}</style>
+      <style jsx>{`
+        header {
           background: #eee;
           padding: 1em 0;
           margin-bottom: 1em;
-          .lead {
-            margin-bottom: 0;
-          }
-          form > * {
-            margin-right: 1em;
-          }
-          input[type=text] {
-            width: 55%;
-            padding: 5px 7px;
-          }
-          img { width: 100px; }
-        `}</style>
+        }
+        .lead {
+          margin-bottom: 0;
+        }
+        form > * {
+          margin-right: 1em;
+        }
+        input[type=text] {
+          width: 55%;
+          padding: 5px 7px;
+        }
+        img { width: 100px; }
+      `}</style>
+
+      <header><div className="container">
 
         <form onSubmit={this.handleSubmit}>
           <a href="/">
@@ -149,7 +164,7 @@ export default class Index extends React.Component {
           </span>
         </form>
 
-      </div>
+      </div></header>
 
       {query && <div className="container">
 
