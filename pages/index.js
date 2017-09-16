@@ -11,6 +11,15 @@ class SearchResult extends React.Component {
     const highlight = r.highlight && (r.highlight['text'] || r.highlight['text.english'])
     return (
       <div className="result">
+        <style>{`
+          div { margin-bottom: 1em; }
+          .title { font-weight: bold; }
+          em {
+            color: #b00;
+            font-weight: bold;
+            font-style: normal;
+          }
+        `}</style>
         <span className="title">{r._source.title || r._source.path}</span>
         &nbsp;
         <small className="text-muted">{r._source.path}</small>
@@ -18,6 +27,101 @@ class SearchResult extends React.Component {
         <p dangerouslySetInnerHTML={{__html: highlight}}/>
       </div>
     )
+  }
+}
+
+class SearchBar extends React.Component {
+
+  constructor (props) {
+    super(props)
+    this.state = {
+      query: props.query,
+      sloppy: !!props.sloppy
+    }
+    this.handleImmediateChange = this.handleImmediateChange.bind(this)
+    this.handleDelayedChange = this.handleDelayedChange.bind(this)
+  }
+
+  _handleChange (cb) {
+    this.setState({
+      query: this.queryInput.value,
+      sloppy: !!this.sloppyCheckbox.checked
+    }, cb)
+  }
+
+  handleImmediateChange () {
+    this.props.onSearch(this.state)
+  }
+
+  handleDelayedChange () {
+    this._handleChange(() => {
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => { this.props.onSearch(this.state) }, 500)
+    })
+  }
+
+  render () {
+    const { query, sloppy } = this.state
+    return <div>
+
+      <style jsx>{`
+        header {
+          background: #eee;
+          padding: 1em 0;
+          margin-bottom: 1em;
+        }
+        .lead {
+          margin-bottom: 0;
+        }
+        form > *, form > .nowrap > * {
+          margin-right: 1em;
+        }
+        input[type=text] {
+          width: 55%;
+          padding: 5px 7px;
+        }
+        img { width: 100px; }
+        @media (max-width: 1200px) {
+          input[type=text] { width: 30%; }
+        }
+        @media (max-width: 768px) {
+          header { padding: 0.5em 0; }
+          input[type=text] { width: 60%; }
+          form > * { margin-right: 0.5em; }
+          img.logo { width: 2em; }
+        }
+      `}</style>
+
+      <header><div className="container">
+
+        <form onSubmit={this.handleImmediateChange}>
+          <a href="/">
+            <img src="/static/dodge-aspen.png"/>
+            <label htmlFor="query" className="lead hidden-xs">Aspen</label>
+          </a>
+          <input id="query" type="text" autoFocus
+            value={query == null ? '' : query}
+            ref={(el) => { this.queryInput = el }}
+            onChange={this.handleDelayedChange}
+          />
+          <button className="btn btn-primary">
+            <span className="hidden-xs">Search</span>
+            <span className="visible-xs fa fa-search fa-reverse"/>
+          </button>
+          <span className="nowrap">
+            <input id="slop" type="checkbox"
+              checked={sloppy}
+              ref={(el) => { this.sloppyCheckbox = el }}
+              onChange={this.handleImmediateChange}
+            />
+            <label htmlFor="slop" className="hidden-xs">Sloppy</label>
+            <label htmlFor="slop" className="visible-xs-inline">S</label>
+          </span>
+        </form>
+
+      </div></header>
+
+    </div>
   }
 }
 
@@ -41,35 +145,15 @@ export default class Index extends React.Component {
       inProgress: false
     }
 
-    this.handleQueryChange = this.handleQueryChange.bind(this)
-    this.handleSloppyChange = this.handleSloppyChange.bind(this)
-    this.handleSubmit = this.handleSubmit.bind(this)
+    this.handleSearch = this.handleSearch.bind(this)
   }
 
   componentDidMount () {
     this.doSearch()
   }
 
-  handleQueryChange (event) {
-    this.setState({ query: event.target.value }, () => {
-      clearTimeout(this.timer)
-      this.timer = setTimeout(() => { this.doSearch() }, 500)
-    })
-  }
-
-  handleSloppyChange (event) {
-    this.setState({ sloppy: event.target.checked }, () => {
-      clearTimeout(this.timer)
-      this.doSearch()
-    })
-  }
-
-  handleSubmit (event) {
-    event.preventDefault()
-    this.setState({ query: this.input.value }, () => {
-      clearTimeout(this.timer)
-      this.doSearch()
-    })
+  handleSearch (newState) {
+    this.setState(newState, () => { this.doSearch() })
   }
 
   async doSearch () {
@@ -112,59 +196,15 @@ export default class Index extends React.Component {
           background: #fafafa;
           color: #111;
           font-family: Georgia, serif;
-          font-size: 16px;
+          font-size: 18px;
         }
         a {
           cursor: pointer;
           color: #00e;
         }
       `}</style>
-      <style jsx>{`
-        header {
-          background: #eee;
-          padding: 1em 0;
-          margin-bottom: 1em;
-        }
-        .lead {
-          margin-bottom: 0;
-        }
-        form > * {
-          margin-right: 1em;
-        }
-        input[type=text] {
-          width: 55%;
-          padding: 5px 7px;
-        }
-        img { width: 100px; }
-      `}</style>
 
-      <header><div className="container">
-
-        <form onSubmit={this.handleSubmit}>
-          <a href="/">
-            <img src="/static/dodge-aspen.png"/>
-            <label htmlFor="query" className="lead hidden-xs">Aspen</label>
-          </a>
-          <input id="query" type="text" autoFocus
-            value={query == null ? '' : query}
-            ref={(input) => { this.input = input }}
-            onChange={this.handleQueryChange}
-          />
-          <button className="btn btn-primary">
-            <span className="hidden-xs">Search</span>
-            <span className="visible-xs fa fa-search fa-reverse"/>
-          </button>
-          <span className="nowrap">
-            <input id="slop" type="checkbox"
-              checked={sloppy}
-              onChange={this.handleSloppyChange}
-            />
-            <label htmlFor="slop" className="hidden-xs">Sloppy</label>
-            <label htmlFor="slop" className="visible-xs-inline">S</label>
-          </span>
-        </form>
-
-      </div></header>
+      <SearchBar query={query} sloppy={sloppy} onSearch={this.handleSearch}/>
 
       {query && <div className="container">
 
