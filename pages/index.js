@@ -98,18 +98,17 @@ export default class Index extends React.Component {
   render () {
     const { query, page, sloppy, inProgress, results } = this.state
     const totalPages = results && Math.ceil(results.hits.total / ITEMS_PER_PAGE)
-    return (
-      <div>
+    return <div>
 
-        <Head>
-          <title>{ query ? `${query} -` : '' } Aspen</title>
-          <meta name="robots" content="noindex, nofollow"/>
-          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
-          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
-        </Head>
+      <Head>
+        <title>{ query ? `${query} -` : '' } Aspen</title>
+        <meta name="robots" content="noindex, nofollow"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+      </Head>
 
-        <div className="container">
-          <style jsx>{`
+      <div className="container">
+        <style jsx>{`
           background: #eee;
           padding: 1em 0;
           margin-bottom: 1em;
@@ -126,71 +125,70 @@ export default class Index extends React.Component {
           img { width: 100px; }
         `}</style>
 
-      <form onSubmit={this.handleSubmit}>
-        <a href="/">
-          <img src="/static/dodge-aspen.png"/>
-          <label htmlFor="query" className="lead hidden-xs">Aspen</label>
-        </a>
-        <input id="query" type="text" autoFocus
-          value={query == null ? '' : query}
-          ref={(input) => { this.input = input }}
-          onChange={this.handleQueryChange}
-        />
-        <button className="btn btn-primary">
-          <span className="hidden-xs">Search</span>
-          <span className="visible-xs fa fa-search fa-reverse"/>
-        </button>
-        <span className="nowrap">
-          <input id="slop" type="checkbox"
-            checked={sloppy}
-            onChange={this.handleSloppyChange}
+        <form onSubmit={this.handleSubmit}>
+          <a href="/">
+            <img src="/static/dodge-aspen.png"/>
+            <label htmlFor="query" className="lead hidden-xs">Aspen</label>
+          </a>
+          <input id="query" type="text" autoFocus
+            value={query == null ? '' : query}
+            ref={(input) => { this.input = input }}
+            onChange={this.handleQueryChange}
           />
-          <label htmlFor="slop" className="hidden-xs">Sloppy</label>
-          <label htmlFor="slop" className="visible-xs-inline">S</label>
-        </span>
-      </form>
+          <button className="btn btn-primary">
+            <span className="hidden-xs">Search</span>
+            <span className="visible-xs fa fa-search fa-reverse"/>
+          </button>
+          <span className="nowrap">
+            <input id="slop" type="checkbox"
+              checked={sloppy}
+              onChange={this.handleSloppyChange}
+            />
+            <label htmlFor="slop" className="hidden-xs">Sloppy</label>
+            <label htmlFor="slop" className="visible-xs-inline">S</label>
+          </span>
+        </form>
 
-    </div>
-
-    {query && <div className="container">
-
-      {results && results.error && <div className="alert alert-danger">
-        Error: {results.error}
-      </div>}
-
-      {inProgress && <div className="text-success">
-        <span className="fa fa-spin fa-circle-o-notch"/>
-      </div>}
-
-      {!inProgress && results && query && <div className="text-success">
-        {results.hits.total} {pluralize(results.hits.total, 'result')} found.
-        Page {page} of {totalPages}.
-        Search took {Number(1000/results.took).toFixed(1)} seconds.
-      </div>}
-
-      {!inProgress && !totalPages && query && <div className="text-danger">
-        0 results found.
-      </div>}
-
-    </div>}
-
-    {query && results && <div className="container results">
-      {results.hits.hits.map(r => <SearchResult {...r} key={r._id} />)}
-    </div>}
-
-    <div className="container">
-      <div className="well">
-        <strong>Quick Help</strong><br/>
-        "Sloppy" checkbox will search over page breaks but is less accurate.<br/>
-        Capitalization doesn't count except for <code>AND</code> and <code>OR</code><br/>
-        Must contain "foo" and either "bar" or "quux": <code>foo (bar OR quux)</code><br/>
-        Must contain "foo" but not "bar": <code>foo -bar</code><br/>
-        Must contain the exact phrase, "the quick brown fox": <code>"the quick brown fox"</code><br/>
-        Search for foo but only in a certain folder: <code>path:"SomeFolder/5" foo</code>
       </div>
-    </div>
 
-  </div>
-    )
+      {query && <div className="container">
+
+        {results && results.error && <div className="alert alert-danger">
+          Error: {results.error}
+        </div>}
+
+        {inProgress && <div className="text-success">
+          <span className="fa fa-spin fa-circle-o-notch"/>
+        </div>}
+
+        {!inProgress && results && query && <div className="text-success">
+          {results.hits.total} {pluralize(results.hits.total, 'result')} found.
+          Page {page} of {totalPages}.
+          Search took {Number(1000/results.took).toFixed(1)} seconds.
+        </div>}
+
+        {!inProgress && !totalPages && query && <div className="text-danger">
+          0 results found.
+        </div>}
+
+      </div>}
+
+      {query && results && <div className="container results">
+        {results.hits.hits.map(r => <SearchResult {...r} key={r._id} />)}
+      </div>}
+
+      <div className="container">
+        <div className="well">
+          <strong>Quick Help</strong><br/>
+          "Sloppy" checkbox will search over page breaks but is less accurate.<br/>
+          Capitalization doesn't count except for <code>AND</code> and <code>OR</code><br/>
+          Must contain "foo" and either "bar" or "quux": <code>foo (bar OR quux)</code><br/>
+          Must contain "foo" but not "bar": <code>foo -bar</code><br/>
+          Must contain the exact phrase, "the quick brown fox": <code>"the quick brown fox"</code><br/>
+          Search for foo but only in a certain folder: <code>path:"SomeFolder/5" foo</code>
+        </div>
+      </div>
+
+    </div>
   }
 }
