@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import React from 'react'
 import fetch from 'isomorphic-unfetch'
 import qs from 'qs'
@@ -12,13 +13,11 @@ class SearchResult extends React.Component {
     return (
       <div className="result">
         <style>{`
-          .title { font-weight: bold }
           em { color: #b00; font-weight: bold; font-style: normal }
         `}</style>
-        <span className="title">{r._source.title || r._source.path}</span>
-        &nbsp;
-        <small className="text-muted">{r._source.path}</small>
+        <strong>{r._source.title || r._source.path}</strong>
         <br/>
+        <small className="text-secondary">{r._source.path}</small>
         <p dangerouslySetInnerHTML={{__html: highlight}}/>
       </div>
     )
@@ -59,54 +58,54 @@ class SearchBar extends React.Component {
     const { query, sloppy } = this.state
     return <div>
 
-      <style jsx>{`
-        header { background: #eee; padding: 1rem 0; margin-bottom: 1rem }
-        .lead { margin-bottom: 0 }
-        .item { margin-right: 1rem }
-        input[type=text] { width: 55%; padding: 5px 7px }
-        img { width: 100px }
-        .nowrap { white-space: nowrap }
-        label { font-weight: normal; cursor: pointer }
-        @media (max-width: 1200px) {
-          input[type=text] { width: 30% }
-        }
-        @media (max-width: 768px) {
-          header { padding: 0.5rem 0 }
-          input[type=text] { width: 60% }
-          .item { margin-right: 0.5rem }
-          img.logo { width: 2rem }
-        }
-      `}</style>
+      <header className="py-3 mb-3" style={{background: '#eee'}}>
+        <div className="container">
 
-      <header><div className="container">
+          <form onSubmit={this.handleImmediateChange}>
+            <div className="row justify-content-between align-items-center">
 
-        <form onSubmit={this.handleImmediateChange}>
-          <a href="/">
-            <img src="/static/dodge-aspen.png" className="item"/>
-            <label htmlFor="query" className="item lead hidden-xs">Aspen</label>
-          </a>
-          <input id="query" type="text" autoFocus className="item"
-            value={query == null ? '' : query}
-            ref={(el) => { this.queryInput = el }}
-            onChange={this.handleDelayedChange}
-          />
-          <button className="item btn btn-primary">
-            <span className="hidden-xs">Search</span>
-            <span className="visible-xs fa fa-search fa-reverse"/>
-          </button>
-          <span className="nowrap">
-            <input id="slop" type="checkbox"
-              checked={sloppy}
-              ref={(el) => { this.sloppyCheckbox = el }}
-              onChange={this.handleImmediateChange}
-            />
-            &nbsp;
-            <label htmlFor="slop" className="item hidden-xs">Sloppy</label>
-            <label htmlFor="slop" className="item visible-xs-inline">S</label>
-          </span>
+              <div className="col-auto">
+                <Link><a href="/">
+                  <img src="/static/dodge-aspen.png" style={{width: 100}}/>
+                </a></Link>
+              </div>
+
+              <div className="col-auto pl-0 d-none d-md-inline">
+                <Link><a href="/" className="text-dark">
+                  <h4 className="pt-0 m-0">Aspen</h4>
+                </a></Link>
+              </div>
+
+              <input className="col px-2"
+                id="queryInput" type="text" autoFocus
+                value={query == null ? '' : query}
+                ref={(el) => { this.queryInput = el }}
+                onChange={this.handleDelayedChange}
+              />
+
+            <div className="col-auto">
+              <button className="btn btn-primary">
+                <span className="d-none d-md-inline mr-1">Search</span>
+                <span className="d-sm-inline d-md-none fa fa-search fa-reverse"/>
+              </button>
+            </div>
+
+            <div className="col-auto pl-0">
+              <input className="mr-1"
+                id="sloppyCheckbox" type="checkbox"
+                checked={sloppy}
+                ref={(el) => { this.sloppyCheckbox = el }}
+                onChange={this.handleImmediateChange}
+              />
+              <label htmlFor="sloppyCheckbox" className="d-none d-md-inline">Sloppy</label>
+              <label htmlFor="sloppyCheckbox" className="d-inline d-md-none">S</label>
+            </div>
+
+          </div>
         </form>
 
-      </div></header>
+      </div>
+    </header>
 
     </div>
   }
@@ -185,8 +184,8 @@ export default class Index extends React.Component {
           font-family: Georgia, serif;
           font-size: 18px;
         }
-        a { cursor: pointer; color: #00e;
-        }
+        a { cursor: pointer }
+        label { font-weight: normal; cursor: pointer }
       `}</style>
       <style jsx>{`
         section { margin-bottom: 1rem }
@@ -200,21 +199,18 @@ export default class Index extends React.Component {
           Error: {results.error}
         </section>}
 
-        {inProgress && <section className="text-muted text-center">
+        {inProgress && <section className="text-secondary text-center">
           <span className="fa fa-spin fa-circle-o-notch"/>
         </section>}
 
         {!inProgress && results && results.hits.total > 0 && <section className="text-success">
-          {results.hits.total} {pluralize(results.hits.total, 'result')} found.
-          Page {page} of {totalPages}.
+          {results.hits.total} {pluralize(results.hits.total, 'result')} found. {' '}
+          Page {page} of {totalPages}. {' '}
           Search took {Number(results.took/1000).toFixed(1)} seconds.
         </section>}
 
         {!inProgress && !totalPages && query && <section className="text-danger">
           0 results found.
-          {results && results.took && <span>
-            Search took {Number(results.took/1000).toFixed(1)} seconds.
-          </span>}
         </section>}
 
       </div>}
@@ -224,15 +220,13 @@ export default class Index extends React.Component {
       </div>}
 
       {!inProgress && <div className="container"><div className="card"><div className="card-body">
-          <h4 className="card-title">Quick Help</h4>
-          <div className="card-text">
-          "Sloppy" checkbox will search over page breaks but is less accurate.<br/>
-          Capitalization doesn't count except for <code>AND</code> and <code>OR</code><br/>
-          Must contain "foo" and either "bar" or "quux": <code>foo (bar OR quux)</code><br/>
-          Must contain "foo" but not "bar": <code>foo -bar</code><br/>
-          Must contain the exact phrase, "the quick brown fox": <code>"the quick brown fox"</code><br/>
-          Search for foo but only in a certain folder: <code>path:"SomeFolder/5" foo</code>
-          </div>
+        <strong>Quick Help</strong><br/>
+        "Sloppy" checkbox will search over page breaks but is less accurate.<br/>
+        Capitalization doesn't count except for <code>AND</code> and <code>OR</code><br/>
+        Must contain "foo" and either "bar" or "quux": <code>foo (bar OR quux)</code><br/>
+        Must contain "foo" but not "bar": <code>foo -bar</code><br/>
+        Must contain the exact phrase, "the quick brown fox": <code>"the quick brown fox"</code><br/>
+        Search for foo but only in a certain folder: <code>path:"SomeFolder/5" foo</code>
       </div></div></div>}
 
     </div>
