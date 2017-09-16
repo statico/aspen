@@ -1,22 +1,48 @@
 import Head from 'next/head'
 import React from 'react'
 import fetch from 'isomorphic-unfetch'
-import getOrigin from '../lib/utils'
+import qs from 'qs'
+import { ITEMS_PER_PAGE, getOrigin } from '../lib/utils'
+import { pluralize } from 'humanize-plus'
+
+class SearchResult extends React.Component {
+  render () {
+    const r = this.props // See Elasticsearch for how results are returned.
+    const highlight = r.highlight && (r.highlight['text'] || r.highlight['text.english'])
+    return (
+      <div className="result">
+        <span className="title">{r._source.title || r._source.path}</span>
+        &nbsp;
+        <small className="text-muted">{r._source.path}</small>
+        <br/>
+        <p dangerouslySetInnerHTML={{__html: highlight}}/>
+      </div>
+    )
+  }
+}
 
 export default class Index extends React.Component {
 
   static async getInitialProps ({ req }) {
-    return { query: req.query.q }
+    let { query, page, sloppy } = req.query
+    return { query, page, sloppy }
   }
 
   constructor (props) {
     super(props)
+
+    const { query, sloppy } = props
+    const page = Number(props.page)
     this.state = {
-      query: props.query,
+      query,
+      page: page && page > 1 ? page : 1,
+      sloppy: !!sloppy,
       results: null,
       inProgress: false
     }
+
     this.handleQueryChange = this.handleQueryChange.bind(this)
+    this.handleSloppyChange = this.handleSloppyChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
   }
 
@@ -25,38 +51,58 @@ export default class Index extends React.Component {
   }
 
   handleQueryChange (event) {
-    this.setState({ query: event.target.value })
-    clearTimeout(this.timer)
-    this.timer = setTimeout(() => { this.doSearch() }, 500)
+    this.setState({ query: event.target.value }, () => {
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => { this.doSearch() }, 500)
+    })
+  }
+
+  handleSloppyChange (event) {
+    this.setState({ sloppy: event.target.checked }, () => {
+      clearTimeout(this.timer)
+      this.doSearch()
+    })
   }
 
   handleSubmit (event) {
-    this.setState({ query: this.input.value })
-    clearTimeout(this.timer)
-    this.doSearch()
     event.preventDefault()
+    this.setState({ query: this.input.value }, () => {
+      clearTimeout(this.timer)
+      this.doSearch()
+    })
   }
 
   async doSearch () {
-    let { query } = this.state
-    if (query != null) {
-      // XXX need page, sloppy
-      this.setState({ inProgress: true })
-      let response = await fetch(getOrigin() + '/search?query=' + encodeURIComponent(query))
-      let results = await response.json()
-      this.setState({ inProgress: false, results: results })
-    } else {
+    const { query, page, sloppy } = this.state
+
+    if (query == null) {
       this.setState({ results: null })
+      return
+    }
+
+    try {
+      this.setState({ inProgress: true })
+      const queryString = qs.stringify({
+        query,
+        page: page && page != 1 ? page : undefined,
+        sloppy: sloppy ? 1 : undefined
+      })
+      const response = await fetch(getOrigin() + '/search?' + queryString)
+      const results = await response.json()
+      this.setState({ results: results })
+    } finally {
+      this.setState({ inProgress: false })
     }
   }
 
   render () {
-    let { query, inProgress, results, totalItems, totalPages } = this.state
+    const { query, page, sloppy, inProgress, results } = this.state
+    const totalPages = results && Math.ceil(results.hits.total / ITEMS_PER_PAGE)
     return (
       <div>
 
         <Head>
-          <title>Aspen</title>
+          <title>{ query ? `${query} -` : '' } Aspen</title>
           <meta name="robots" content="noindex, nofollow"/>
           <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
           <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
@@ -96,7 +142,7 @@ export default class Index extends React.Component {
         </button>
         <span className="nowrap">
           <input id="slop" type="checkbox"
-            checked={this.state.sloppy}
+            checked={sloppy}
             onChange={this.handleSloppyChange}
           />
           <label htmlFor="slop" className="hidden-xs">Sloppy</label>
@@ -106,7 +152,7 @@ export default class Index extends React.Component {
 
     </div>
 
-    {query && <div>
+    {query && <div className="container">
 
       {results && results.error && <div className="alert alert-danger">
         Error: {results.error}
@@ -116,22 +162,33 @@ export default class Index extends React.Component {
         <span className="fa fa-spin fa-circle-o-notch"/>
       </div>}
 
-      {!inProgress && totalItems && <div className="text-success">
-        {results.TotalItems} results found.
-        Page {results.currentPage} of {results.totalPages}.
+      {!inProgress && results && query && <div className="text-success">
+        {results.hits.total} {pluralize(results.hits.total, 'result')} found.
+        Page {page} of {totalPages}.
+        Search took {Number(1000/results.took).toFixed(1)} seconds.
       </div>}
 
-      {!inProgress && !totalPages && <div className="text-danger">
+      {!inProgress && !totalPages && query && <div className="text-danger">
         0 results found.
       </div>}
 
     </div>}
 
-    {results && results.length && <div className="container results">
-
-      <pre>{JSON.stringify(this.state.results, null, '  ')}</pre>
-
+    {query && results && <div className="container results">
+      {results.hits.hits.map(r => <SearchResult {...r} key={r._id} />)}
     </div>}
+
+    <div className="container">
+      <div className="well">
+        <strong>Quick Help</strong><br/>
+        "Sloppy" checkbox will search over page breaks but is less accurate.<br/>
+        Capitalization doesn't count except for <code>AND</code> and <code>OR</code><br/>
+        Must contain "foo" and either "bar" or "quux": <code>foo (bar OR quux)</code><br/>
+        Must contain "foo" but not "bar": <code>foo -bar</code><br/>
+        Must contain the exact phrase, "the quick brown fox": <code>"the quick brown fox"</code><br/>
+        Search for foo but only in a certain folder: <code>path:"SomeFolder/5" foo</code>
+      </div>
+    </div>
 
   </div>
     )

@@ -14,9 +14,9 @@ async function main () {
 
   server.get('/search', async (req, res) => {
     res.header('Cache-Control', 'no-cache')
-    let query = req.query.query
-    let page = Number(req.query.page) || 0
-    let sloppy = !!req.query.sloppy
+    const query = req.query.query
+    const page = Number(req.query.page) || 0
+    const sloppy = !!req.query.sloppy
     let results
     try {
       results = await search(query, page, sloppy)
@@ -28,7 +28,10 @@ async function main () {
   })
 
   server.get('*', (req, res) => {
-    const params = { q: req.query.q }
+    const query = req.query.query
+    const page = Number(req.query.page) || 0
+    const sloppy = !!req.query.sloppy
+    const params = { query, page, sloppy }
     return handle(req, res, null, params)
   })
 
