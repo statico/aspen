@@ -13,11 +13,10 @@ class SearchResult extends React.Component {
     return (
       <div className="result">
         <style>{`
-          em { color: #b00; font-weight: bold; font-style: normal }
+          mark { font-weight: bold }
         `}</style>
-        <strong>{r._source.title || r._source.path}</strong>
-        <br/>
-        <small className="text-secondary">{r._source.path}</small>
+        <div><strong>{r._source.title || r._source.path}</strong></div>
+        <div><small className="text-secondary">{r._source.path}</small></div>
         <p dangerouslySetInnerHTML={{__html: highlight}}/>
       </div>
     )
@@ -43,11 +42,13 @@ class SearchBar extends React.Component {
     }, cb)
   }
 
-  handleImmediateChange () {
+  handleImmediateChange (event) {
+    clearTimeout(this.timer)
     this.props.onSearch(this.state)
+    if (event.target.tagName.toLowerCase() === 'form') event.preventDefault()
   }
 
-  handleDelayedChange () {
+  handleDelayedChange (event) {
     this._handleChange(() => {
       clearTimeout(this.timer)
       this.timer = setTimeout(() => { this.props.onSearch(this.state) }, 500)
@@ -199,7 +200,7 @@ export default class Index extends React.Component {
           Error: {results.error}
         </section>}
 
-        {inProgress && <section className="text-secondary text-center">
+        {inProgress && <section className="text-secondary">
           <span className="fa fa-spin fa-circle-o-notch"/>
         </section>}
 
@@ -210,7 +211,7 @@ export default class Index extends React.Component {
         </section>}
 
         {!inProgress && !totalPages && query && <section className="text-danger">
-          0 results found.
+          0 results found for query: {query}
         </section>}
 
       </div>}
@@ -219,7 +220,7 @@ export default class Index extends React.Component {
         {results.hits.hits.map(r => <SearchResult {...r} key={r._id} />)}
       </div>}
 
-      {!inProgress && <div className="container"><div className="card"><div className="card-body">
+      {<div className="container"><div className="card"><div className="card-body">
         <strong>Quick Help</strong><br/>
         "Sloppy" checkbox will search over page breaks but is less accurate.<br/>
         Capitalization doesn't count except for <code>AND</code> and <code>OR</code><br/>
