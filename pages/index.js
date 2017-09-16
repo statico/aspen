@@ -12,13 +12,8 @@ class SearchResult extends React.Component {
     return (
       <div className="result">
         <style>{`
-          div { margin-bottom: 1em; }
-          .title { font-weight: bold; }
-          em {
-            color: #b00;
-            font-weight: bold;
-            font-style: normal;
-          }
+          .title { font-weight: bold }
+          em { color: #b00; font-weight: bold; font-style: normal }
         `}</style>
         <span className="title">{r._source.title || r._source.path}</span>
         &nbsp;
@@ -65,30 +60,21 @@ class SearchBar extends React.Component {
     return <div>
 
       <style jsx>{`
-        header {
-          background: #eee;
-          padding: 1em 0;
-          margin-bottom: 1em;
-        }
-        .lead {
-          margin-bottom: 0;
-        }
-        form > *, form > .nowrap > * {
-          margin-right: 1em;
-        }
-        input[type=text] {
-          width: 55%;
-          padding: 5px 7px;
-        }
-        img { width: 100px; }
+        header { background: #eee; padding: 1rem 0; margin-bottom: 1rem }
+        .lead { margin-bottom: 0 }
+        .item { margin-right: 1rem }
+        input[type=text] { width: 55%; padding: 5px 7px }
+        img { width: 100px }
+        .nowrap { white-space: nowrap }
+        label { font-weight: normal; cursor: pointer }
         @media (max-width: 1200px) {
-          input[type=text] { width: 30%; }
+          input[type=text] { width: 30% }
         }
         @media (max-width: 768px) {
-          header { padding: 0.5em 0; }
-          input[type=text] { width: 60%; }
-          form > * { margin-right: 0.5em; }
-          img.logo { width: 2em; }
+          header { padding: 0.5rem 0 }
+          input[type=text] { width: 60% }
+          .item { margin-right: 0.5rem }
+          img.logo { width: 2rem }
         }
       `}</style>
 
@@ -96,15 +82,15 @@ class SearchBar extends React.Component {
 
         <form onSubmit={this.handleImmediateChange}>
           <a href="/">
-            <img src="/static/dodge-aspen.png"/>
-            <label htmlFor="query" className="lead hidden-xs">Aspen</label>
+            <img src="/static/dodge-aspen.png" className="item"/>
+            <label htmlFor="query" className="item lead hidden-xs">Aspen</label>
           </a>
-          <input id="query" type="text" autoFocus
+          <input id="query" type="text" autoFocus className="item"
             value={query == null ? '' : query}
             ref={(el) => { this.queryInput = el }}
             onChange={this.handleDelayedChange}
           />
-          <button className="btn btn-primary">
+          <button className="item btn btn-primary">
             <span className="hidden-xs">Search</span>
             <span className="visible-xs fa fa-search fa-reverse"/>
           </button>
@@ -114,8 +100,9 @@ class SearchBar extends React.Component {
               ref={(el) => { this.sloppyCheckbox = el }}
               onChange={this.handleImmediateChange}
             />
-            <label htmlFor="slop" className="hidden-xs">Sloppy</label>
-            <label htmlFor="slop" className="visible-xs-inline">S</label>
+            &nbsp;
+            <label htmlFor="slop" className="item hidden-xs">Sloppy</label>
+            <label htmlFor="slop" className="item visible-xs-inline">S</label>
           </span>
         </form>
 
@@ -187,7 +174,7 @@ export default class Index extends React.Component {
       <Head>
         <title>{ query ? `${query} -` : '' } Aspen</title>
         <meta name="robots" content="noindex, nofollow"/>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"/>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
       </Head>
 
@@ -198,33 +185,37 @@ export default class Index extends React.Component {
           font-family: Georgia, serif;
           font-size: 18px;
         }
-        a {
-          cursor: pointer;
-          color: #00e;
+        a { cursor: pointer; color: #00e;
         }
+      `}</style>
+      <style jsx>{`
+        section { margin-bottom: 1rem }
       `}</style>
 
       <SearchBar query={query} sloppy={sloppy} onSearch={this.handleSearch}/>
 
       {query && <div className="container">
 
-        {results && results.error && <div className="alert alert-danger">
+        {results && results.error && <section className="alert alert-danger">
           Error: {results.error}
-        </div>}
+        </section>}
 
-        {inProgress && <div className="text-success">
+        {inProgress && <section className="text-muted text-center">
           <span className="fa fa-spin fa-circle-o-notch"/>
-        </div>}
+        </section>}
 
-        {!inProgress && results && query && <div className="text-success">
+        {!inProgress && results && results.hits.total > 0 && <section className="text-success">
           {results.hits.total} {pluralize(results.hits.total, 'result')} found.
           Page {page} of {totalPages}.
-          Search took {Number(1000/results.took).toFixed(1)} seconds.
-        </div>}
+          Search took {Number(results.took/1000).toFixed(1)} seconds.
+        </section>}
 
-        {!inProgress && !totalPages && query && <div className="text-danger">
+        {!inProgress && !totalPages && query && <section className="text-danger">
           0 results found.
-        </div>}
+          {results && results.took && <span>
+            Search took {Number(results.took/1000).toFixed(1)} seconds.
+          </span>}
+        </section>}
 
       </div>}
 
@@ -232,17 +223,17 @@ export default class Index extends React.Component {
         {results.hits.hits.map(r => <SearchResult {...r} key={r._id} />)}
       </div>}
 
-      <div className="container">
-        <div className="well">
-          <strong>Quick Help</strong><br/>
+      {!inProgress && <div className="container"><div className="card"><div className="card-body">
+          <h4 className="card-title">Quick Help</h4>
+          <div className="card-text">
           "Sloppy" checkbox will search over page breaks but is less accurate.<br/>
           Capitalization doesn't count except for <code>AND</code> and <code>OR</code><br/>
           Must contain "foo" and either "bar" or "quux": <code>foo (bar OR quux)</code><br/>
           Must contain "foo" but not "bar": <code>foo -bar</code><br/>
           Must contain the exact phrase, "the quick brown fox": <code>"the quick brown fox"</code><br/>
           Search for foo but only in a certain folder: <code>path:"SomeFolder/5" foo</code>
-        </div>
-      </div>
+          </div>
+      </div></div></div>}
 
     </div>
   }
