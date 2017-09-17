@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import React from 'react'
+import Router from 'next/router'
 import fetch from 'isomorphic-unfetch'
 import qs from 'qs'
 import { ITEMS_PER_PAGE, getOrigin } from '../lib/utils'
@@ -343,13 +344,13 @@ export default class Index extends React.Component {
     }
 
     try {
-      this.setState({ inProgress: true })
+      this.setState({ inProgress: true, results: null })
       const queryString = qs.stringify({
         query,
         page: page && page > 0 ? page + 1 : undefined,
         sloppy: sloppy ? 1 : undefined
       })
-      this.props.url.push('/?' + queryString)
+      Router.push('/?' + queryString)
       const response = await fetch(getOrigin() + '/search?' + queryString)
       const results = await response.json()
       this.setState({ results: results })
