@@ -10,38 +10,47 @@ class DrillDownOverlay extends React.Component {
 
   constructor (props) {
     super(props)
-    this.state = {
-    }
+    this.state = {}
+    this.loadContent()
+  }
+
+  url () {
+    return getOrigin() + '/static/data/' + this.props.hit._source.path
+  }
+
+  async loadContent () {
+    const res = await fetch(this.url())
+    const content = await res.text()
+    console.log('XXX', content)
+    this.setState({ content })
   }
 
   render () {
     const { hit } = this.props
+    const { content } = this.state
     return (
-      <div>
+      <div className="modal fade show d-block" role="dialog" onClick={this.props.onDismiss}>
         <style jsx>{`
-          .overlay {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            background: rgba(0,0,0,.87);
-            color: #fafafa;
-            z-index: 100;
-            cursor: pointer;
-          }
-          .viewer {
-            width: 600px;
-            background: #fafafa;
-            color: #111;
-          }
-          @media (max-width: 600px) {
-            .viewer { width: 90% }
-          }
+          .modal { background: rgba(0,0,0,.5) }
+          .modal-content, .modal-body { max-height: 90vh }
+          .modal-body { overflow-y: scroll }
         `}</style>
-        <div className="overlay row justify-content-center py-3" onClick={this.props.onDismiss}>
-          <div className="viewer col-auto rounded">
-            hey
+        <div className="modal-dialog modal-lg" role="document" onClick={e => e.stopPropagation()}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title mr-auto">{hit._source.path}</h5>
+              <a className="btn btn-light ml-3" href={this.url()} onClick={this.props.onDismiss}>
+                <span className="fa fa-external-link"></span>
+                <span className="d-none d-md-inline ml-2">Open</span>
+              </a>
+              <button className="btn btn-light ml-3" onClick={this.props.onDismiss}>
+                <span className="fa fa-close"></span>
+                <span className="d-none d-md-inline ml-2">Close</span>
+              </button>
+            </div>
+            {content && <div className="modal-body">
+              <pre>{content}</pre>
+            </div>}
           </div>
         </div>
       </div>
@@ -243,8 +252,8 @@ export default class Index extends React.Component {
           font-family: Georgia, serif;
           font-size: 18px;
         }
-        a { cursor: pointer }
-        label { font-weight: normal; cursor: pointer }
+        button, a, label { cursor: pointer }
+        label { font-weight: normal }
       `}</style>
       <style>{`
         section { margin-bottom: 1rem }
