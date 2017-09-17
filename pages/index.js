@@ -101,7 +101,7 @@ class DrillDownOverlay extends React.Component {
                     disabled={!this.canGoToPreviousLocation()}
                     onClick={this.goToPreviousLocation}
                     >
-                  <span className="fa fa-arrow-left"></span>
+                  <span className="fa fa-angle-left"></span>
                   <span className="d-none d-lg-inline ml-2">Previous</span>
                 </button>
                 <button className="btn btn-secondary"
@@ -109,7 +109,7 @@ class DrillDownOverlay extends React.Component {
                     onClick={this.goToNextLocation}
                     >
                   <span className="d-none d-lg-inline mr-2">Next</span>
-                  <span className="fa fa-arrow-right"></span>
+                  <span className="fa fa-angle-right"></span>
                 </button>
               </div>
               <span className="ml-2">
@@ -242,6 +242,51 @@ class SearchBar extends React.Component {
   }
 }
 
+class Pagination extends React.PureComponent {
+
+  render () {
+    const { currentPage, totalPages } = this.props
+    const hasPreviousPage = currentPage > 0
+    const hasNextPage = currentPage < totalPages - 1
+
+    // Since the pagination can get unweildly with, say, 100 pages, only show 10 or so buttons.
+    const [firstPage, lastPage] =
+      (currentPage < 5) ? [0, Math.min(totalPages, 9)] :
+      (currentPage > (totalPages - 6)) ? [Math.max(0, totalPages - 10), totalPages] :
+      [currentPage - 5, currentPage + 5]
+    const pages = Array.from(new Array(lastPage - firstPage), (v, i) => firstPage + i)
+
+    return (
+      <ul className="pagination justify-content-center">
+
+        <li className={'page-item ' + (hasPreviousPage ? '' : 'disabled')} key="previous">
+          <a href="#" className="page-link"
+            tabIndex={hasPreviousPage ? null : -1}
+            onClick={() => { this.props.onSelectPage(currentPage - 1); e.stopPropagation() }}
+          ><span className="fa fa-angle-left"/></a>
+        </li>
+
+        {pages.map(i => {
+          return <li className={'page-item ' + (i === currentPage ? 'disabled' : '')} key={i}>
+            <a href="#" className="page-link"
+              tabIndex={i === currentPage ? -1 : null}
+              onClick={(e) => { this.props.onSelectPage(i) }}
+            >{i + 1}</a>
+          </li>
+        })}
+
+        <li className={'page-item ' + (hasNextPage ? '' : 'disabled')} key="next">
+          <a href="#" className="page-link"
+            tabIndex={hasNextPage ? null : -1}
+            onClick={(e) => { this.props.onSelectPage(currentPage + 1); e.stopPropagation() }}
+          ><span className="fa fa-angle-right"/></a>
+        </li>
+
+      </ul>
+    )
+  }
+}
+
 export default class Index extends React.Component {
 
   static async getInitialProps ({ req }) {
@@ -256,7 +301,7 @@ export default class Index extends React.Component {
     const page = Number(props.page)
     this.state = {
       query,
-      page: page && page > 1 ? page : 1,
+      page: page && page > 0 ? page : 0,
       sloppy: !!sloppy,
       results: null,
       inProgress: false,
@@ -266,6 +311,7 @@ export default class Index extends React.Component {
     this.handleSearch = this.handleSearch.bind(this)
     this.handleResultClick = this.handleResultClick.bind(this)
     this.handleDrillDownDismiss = this.handleDrillDownDismiss.bind(this)
+    this.handlePageSelect = this.handlePageSelect.bind(this)
   }
 
   componentDidMount () {
@@ -273,7 +319,10 @@ export default class Index extends React.Component {
   }
 
   handleSearch (newState) {
-    this.setState(newState, () => { this.doSearch() })
+    this.setState(newState, () => {
+      this.setState({ page: 0 }, () => {
+        this.doSearch()
+    })})
   }
 
   handleResultClick (hitId) {
@@ -282,6 +331,10 @@ export default class Index extends React.Component {
 
   handleDrillDownDismiss () {
     this.setState({ drillDownResultId: null })
+  }
+
+  handlePageSelect (newPage) {
+    this.setState({ results: null, page: newPage }, () => { this.doSearch() })
   }
 
   async doSearch () {
@@ -296,7 +349,7 @@ export default class Index extends React.Component {
       this.setState({ inProgress: true })
       const queryString = qs.stringify({
         query,
-        page: page && page != 1 ? page : undefined,
+        page: page && page !== 0 ? page : undefined,
         sloppy: sloppy ? 1 : undefined
       })
       const response = await fetch(getOrigin() + '/search?' + queryString)
@@ -323,46 +376,46 @@ export default class Index extends React.Component {
         body {
           background: #fafafa;
           color: #111;
-          font-family: Georgia, serif;
           font-size: 18px;
         }
         button, .btn, a, label { cursor: pointer }
         label { font-weight: normal }
         mark { background: transparent; color: #dc3545; font-weight: bold }
       `}</style>
-      <style>{`
-        section { margin-bottom: 1rem }
-      `}</style>
 
       <SearchBar query={query} sloppy={sloppy} onSearch={this.handleSearch}/>
 
       {query && <div className="container">
 
-        {results && results.error && <section className="alert alert-danger">
+        {results && results.error && <div className="alert alert-danger mb-3">
           Error: {results.error}
-        </section>}
+        </div>}
 
-        {inProgress && <section className="text-secondary">
+        {inProgress && <div className="text-secondary mb-3">
           <span className="fa fa-spin fa-circle-o-notch"/>
-        </section>}
+        </div>}
 
-        {!inProgress && results && results.hits.total > 0 && <section className="text-success">
+        {!inProgress && results && results.hits.total > 0 && <div className="text-success mb-3">
           {results.hits.total} {pluralize(results.hits.total, 'result')} found. {' '}
-          Page {page} of {totalPages}. {' '}
+          Page {page + 1} of {totalPages}. {' '}
           Search took {Number(results.took/1000).toFixed(1)} seconds.
-        </section>}
+        </div>}
 
-        {!inProgress && !totalPages && query && <section className="text-danger">
+        {!inProgress && !totalPages && query && <div className="text-danger mb-3">
           0 results found for query: {query}
-        </section>}
+        </div>}
 
       </div>}
 
-      {query && results && <div className="container results">
+      {query && results && <div className="container results mb-3">
         {results.hits.hits.map(hit => <div key={hit._id}>
           <SearchResult hit={hit} onClick={() => { this.handleResultClick(hit._id) }}/>
           {drillDownResultId == hit._id && <DrillDownOverlay hit={hit} onDismiss={this.handleDrillDownDismiss}/>}
         </div>)}
+      </div>}
+
+      {query && results && totalPages > 1 && <div className="container mb-3 text-center">
+        <Pagination currentPage={page} totalPages={totalPages} onSelectPage={this.handlePageSelect}/>
       </div>}
 
       {<div className="container"><div className="card"><div className="card-body">
