@@ -37,7 +37,7 @@ async function main () {
     return handle(req, res, null, params)
   })
 
-  server.use(serveIndex(join(__dirname, 'static'), { icons: true }))
+  server.use('/static/data', serveIndex(join(__dirname, 'static/data'), { icons: true }))
 
   server.get('*', (req, res) => {
     return handle(req, res)

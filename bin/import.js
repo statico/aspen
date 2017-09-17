@@ -33,7 +33,8 @@ function walk (dir, fn) {
     let paths = []
     let walker = walklib.walk(dir, { followLinks: true })
     walker.on('file', (root, stat, next) => {
-      paths.push(join(root, stat.name))
+      if ((/\.txt$/i).test(stat.name)) paths.push(join(root, stat.name))
+      else console.log(chalk.yellow('▲'), `Ignoring non-text path: ${stat.name}`)
       next()
     })
     walker.on('errors', (root, stat, next) => {
