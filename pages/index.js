@@ -1,289 +1,14 @@
+import DrillDown from '../components/drill-down.js'
 import Head from 'next/head'
 import Link from 'next/link'
+import Pagination from '../components/pagination.js'
 import React from 'react'
 import Router from 'next/router'
+import SearchBar from '../components/search-bar.js'
 import fetch from 'isomorphic-unfetch'
 import qs from 'qs'
-import { ITEMS_PER_PAGE, getOrigin } from '../lib/utils'
+import { RESULTS_PER_PAGE, getOrigin } from '../lib/utils'
 import { pluralize } from 'humanize-plus'
-
-class DrillDownOverlay extends React.Component {
-
-  constructor (props) {
-    super(props)
-    this.state = {
-      content: null,
-      contentWithMarkup: null,
-      currentLocation: 0
-    }
-    this.canGoToPreviousLocation = this.canGoToPreviousLocation.bind(this)
-    this.canGoToNextLocation = this.canGoToNextLocation.bind(this)
-    this.goToNextLocation = this.goToNextLocation.bind(this)
-    this.goToPreviousLocation = this.goToPreviousLocation.bind(this)
-  }
-
-  get url () {
-    return getOrigin() + '/static/data/' + this.props.hit._source.path
-  }
-
-  async componentDidMount () {
-    const res = await fetch(this.url)
-    const content = await res.text()
-    this.setState({ content }, () => {
-      this.setLocation(0)
-    })
-  }
-
-  canGoToNextLocation () {
-    return this.state.currentLocation < this.props.hit.highlight_locations.length - 1
-  }
-  canGoToPreviousLocation () {
-    return this.state.currentLocation > 0
-  }
-  goToNextLocation () {
-    if (this.canGoToNextLocation()) this.setLocation(this.state.currentLocation + 1)
-  }
-  goToPreviousLocation () {
-    if (this.canGoToPreviousLocation()) this.setLocation(this.state.currentLocation - 1)
-  }
-
-  setLocation (newLocation) {
-    this.setState({ currentLocation: newLocation }, () => {
-      const tuple = this.props.hit.highlight_locations[this.state.currentLocation]
-      if (tuple == null) return
-      const [start, end] = tuple
-
-      let content = this.state.content
-      content = content.substring(0, start) + '__STARTSPAN__' +
-        content.substring(start, end) + '__ENDSPAN__' +
-        content.substring(end)
-      content = content
-        .replace(/</g, '&lt;')
-        .replace('__STARTSPAN__', '<mark>')
-        .replace('__ENDSPAN__', '</mark>')
-
-      this.setState({ contentWithMarkup: content }, () => {
-        const container = this.contentViewer.parentElement
-        const mark = this.contentViewer.getElementsByTagName('mark')[0]
-        container.scrollTop = mark.offsetTop - 100
-      })
-    })
-  }
-
-  render () {
-    const { hit } = this.props
-    const { contentWithMarkup } = this.state
-    return (
-      <div className="modal fade show d-block" role="dialog" onClick={this.props.onDismiss}>
-        <style jsx>{`
-          .modal { background: rgba(0,0,0,.5) }
-          .modal-content, .modal-body { max-height: 90vh }
-          .modal-body { overflow-y: scroll; overflow-x: auto }
-          @media (min-width: 768px) {
-            .modal-dialog { width: 90%; max-width:1200px }
-          }
-        `}</style>
-        <div className="modal-dialog" role="document" onClick={e => e.stopPropagation()}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title mr-auto">{hit._source.path}</h5>
-              <a className="btn btn-secondary d-none d-md-inline ml-3" href={this.url} onClick={this.props.onDismiss} target="_new">
-                <span className="fa fa-external-link"></span>
-                <span className="d-none d-lg-inline ml-2">View File</span>
-              </a>
-              <button className="btn btn-secondary ml-3" onClick={this.props.onDismiss}>
-                <span className="fa fa-close"></span>
-                <span className="d-none d-lg-inline ml-2">Close</span>
-              </button>
-            </div>
-            <div className="modal-header justify-content-start">
-              <div className="btn-group">
-                <button className="btn btn-secondary"
-                    disabled={!this.canGoToPreviousLocation()}
-                    onClick={this.goToPreviousLocation}
-                    >
-                  <span className="fa fa-angle-left"></span>
-                  <span className="d-none d-lg-inline ml-2">Previous</span>
-                </button>
-                <button className="btn btn-secondary"
-                    disabled={!this.canGoToNextLocation()}
-                    onClick={this.goToNextLocation}
-                    >
-                  <span className="d-none d-lg-inline mr-2">Next</span>
-                  <span className="fa fa-angle-right"></span>
-                </button>
-              </div>
-              <span className="ml-2">
-                Match {this.state.currentLocation + 1} {' '}
-                of {this.props.hit.highlight_locations.length}
-              </span>
-            </div>
-            {!contentWithMarkup && <div className="modal-body text-center m-3">
-              <span className="fa fa-spin fa-circle-o-notch"/>
-            </div>}
-            {contentWithMarkup && <div className="modal-body">
-              <pre
-                ref={(el) => { this.contentViewer = el }}
-                dangerouslySetInnerHTML={{__html: contentWithMarkup}}
-              />
-            </div>}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-}
-
-class SearchResult extends React.Component {
-  render () {
-    const { hit } = this.props // See Elasticsearch for how results are returned.
-    const highlight = hit.highlight && (hit.highlight['text'] || hit.highlight['text.english'])
-    return (
-      <div className="result" onClick={this.props.onClick || null}>
-        <style jsx>{`
-          div { cursor: pointer }
-          div:hover strong { text-decoration: underline; color #007bff }
-        `}</style>
-        <strong>{hit._source.title || hit._source.path}</strong>
-        <small className="ml-2 text-secondary">{hit._source.path}</small>
-        <br/>
-        <p dangerouslySetInnerHTML={{__html: highlight}}/>
-      </div>
-    )
-  }
-}
-
-class SearchBar extends React.Component {
-
-  constructor (props) {
-    super(props)
-    this.state = {
-      query: props.query,
-      sloppy: !!props.sloppy
-    }
-    this.handleImmediateChange = this.handleImmediateChange.bind(this)
-    this.handleDelayedChange = this.handleDelayedChange.bind(this)
-  }
-
-  _handleChange (cb) {
-    this.setState({
-      query: this.queryInput.value,
-      sloppy: !!this.sloppyCheckbox.checked
-    }, cb)
-  }
-
-  handleImmediateChange (event) {
-    clearTimeout(this.timer)
-    this.props.onSearch(this.state)
-    if (event.target.tagName.toLowerCase() === 'form') event.preventDefault()
-  }
-
-  handleDelayedChange (event) {
-    this._handleChange(() => {
-      clearTimeout(this.timer)
-      this.timer = setTimeout(() => { this.props.onSearch(this.state) }, 500)
-    })
-  }
-
-  render () {
-    const { query, sloppy } = this.state
-    return <div>
-
-      <header className="py-3 mb-3" style={{background: '#eee'}}>
-        <div className="container">
-
-          <form onSubmit={this.handleImmediateChange}>
-            <div className="row justify-content-between align-items-center">
-
-              <div className="col-auto">
-                <a href="/">
-                  <h4 className="m-0">
-                    <span className="fa fa-leaf text-success"/>
-                    <span className="d-none d-md-inline text-dark pt-0 my-0 ml-1">Aspen</span>
-                  </h4>
-                </a>
-              </div>
-
-              <input className="col px-2"
-                id="queryInput" type="text" autoFocus
-                value={query == null ? '' : query}
-                ref={(el) => { this.queryInput = el }}
-                onChange={this.handleDelayedChange}
-              />
-
-            <div className="col-auto">
-              <button className="btn btn-primary">
-                <span className="d-none d-md-inline mr-1">Search</span>
-                <span className="d-sm-inline d-md-none fa fa-search fa-reverse"/>
-              </button>
-            </div>
-
-            <div className="col-auto pl-0">
-              <input className="mr-1"
-                id="sloppyCheckbox" type="checkbox"
-                checked={sloppy}
-                ref={(el) => { this.sloppyCheckbox = el }}
-                onChange={this.handleImmediateChange}
-              />
-              <label htmlFor="sloppyCheckbox" className="d-none d-md-inline">Sloppy</label>
-              <label htmlFor="sloppyCheckbox" className="d-inline d-md-none mr-1">S</label>
-            </div>
-
-          </div>
-        </form>
-
-      </div>
-    </header>
-
-    </div>
-  }
-}
-
-class Pagination extends React.PureComponent {
-
-  render () {
-    const { currentPage, totalPages } = this.props
-    const hasPreviousPage = currentPage > 0
-    const hasNextPage = currentPage < totalPages - 1
-
-    // Since the pagination can get unweildly with, say, 100 pages, only show 10 or so buttons.
-    const [firstPage, lastPage] =
-      (currentPage < 5) ? [0, Math.min(totalPages, 9)] :
-      (currentPage > (totalPages - 6)) ? [Math.max(0, totalPages - 10), totalPages] :
-      [currentPage - 5, currentPage + 5]
-    const pages = Array.from(new Array(lastPage - firstPage), (v, i) => firstPage + i)
-
-    return (
-      <ul className="pagination justify-content-center">
-
-        <li className={'page-item ' + (hasPreviousPage ? '' : 'disabled')} key="previous">
-          <a href="#" className="page-link"
-            tabIndex={hasPreviousPage ? null : -1}
-            onClick={() => { this.props.onSelectPage(currentPage - 1); e.preventDefault() }}
-          ><span className="fa fa-angle-left"/></a>
-        </li>
-
-        {pages.map(i => {
-          return <li className={'page-item ' + (i === currentPage ? 'disabled' : '')} key={i}>
-            <a href="#" className="page-link"
-              tabIndex={i === currentPage ? -1 : null}
-              onClick={(e) => { this.props.onSelectPage(i); e.preventDefault() }}
-            >{i + 1}</a>
-          </li>
-        })}
-
-        <li className={'page-item ' + (hasNextPage ? '' : 'disabled')} key="next">
-          <a href="#" className="page-link"
-            tabIndex={hasNextPage ? null : -1}
-            onClick={(e) => { this.props.onSelectPage(currentPage + 1); e.preventDefault() }}
-          ><span className="fa fa-angle-right"/></a>
-        </li>
-
-      </ul>
-    )
-  }
-}
 
 export default class Index extends React.Component {
 
@@ -409,7 +134,7 @@ export default class Index extends React.Component {
       {query && results && <div className="container results mb-3">
         {results.hits.hits.map(hit => <div key={hit._id}>
           <SearchResult hit={hit} onClick={() => { this.handleResultClick(hit._id) }}/>
-          {drillDownResultId == hit._id && <DrillDownOverlay hit={hit} onDismiss={this.handleDrillDownDismiss}/>}
+          {drillDownResultId == hit._id && <DrillDown hit={hit} onDismiss={this.handleDrillDownDismiss}/>}
         </div>)}
       </div>}
 
@@ -430,3 +155,23 @@ export default class Index extends React.Component {
     </div>
   }
 }
+
+class SearchResult extends React.Component {
+  render () {
+    const { hit } = this.props // See Elasticsearch for how results are returned.
+    const highlight = hit.highlight && (hit.highlight['text'] || hit.highlight['text.english'])
+    return (
+      <div className="result" onClick={this.props.onClick || null}>
+        <style jsx>{`
+          div { cursor: pointer }
+          div:hover strong { text-decoration: underline; color #007bff }
+        `}</style>
+        <strong>{hit._source.title || hit._source.path}</strong>
+        <small className="ml-2 text-secondary">{hit._source.path}</small>
+        <br/>
+        <p dangerouslySetInnerHTML={{__html: highlight}}/>
+      </div>
+    )
+  }
+}
+
