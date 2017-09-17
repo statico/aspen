@@ -10,15 +10,20 @@ const handle = app.getRequestHandler()
 
 const { search } = require('./lib/elasticsearch')
 
+function getParams (params) {
+  const query = params.query
+  const page = (Number(params.page) || 1) - 1 // 'page' query param is 1-indexed
+  const sloppy = !!params.sloppy
+  return { query, page, sloppy }
+}
+
 async function main () {
   await app.prepare()
   const server = express()
 
   server.get('/search', async (req, res) => {
     res.header('Cache-Control', 'no-cache')
-    const query = req.query.query
-    const page = (Number(req.query.page) || 1) - 1 // 'page' query param is 1-indexed
-    const sloppy = !!req.query.sloppy
+    const { query, page, sloppy } = getParams(req.query)
     let results
     try {
       results = await search(query, page, sloppy)
@@ -30,11 +35,7 @@ async function main () {
   })
 
   server.get('/', (req, res) => {
-    const query = req.query.query
-    const page = (Number(req.query.page) || 1) - 1 // 'page' query param is 1-indexed
-    const sloppy = !!req.query.sloppy
-    const params = { query, page, sloppy }
-    return handle(req, res, null, params)
+    return handle(req, res, null, getParams(req.query))
   })
 
   server.use('/static/data', serveIndex(join(__dirname, 'static/data'), { icons: true }))
