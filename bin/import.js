@@ -6,7 +6,7 @@ const elasticsearch = require('../lib/elasticsearch')
 const fs = require('fs')
 const pathIsInside = require('path-is-inside')
 const walklib = require('walk')
-const { extractTitle } = require('../lib/plaintext')
+const extractTitle = require('../lib/extract-title')
 const { join, relative, resolve } = require('path')
 
 commander
@@ -67,5 +67,4 @@ function walk (dir, fn) {
   } catch (err) {
     console.error(chalk.red('✗'), err.toString())
     process.exit(1)
-  }
-})()
+  } })()
