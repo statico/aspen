@@ -196,15 +196,12 @@ class SearchBar extends React.Component {
             <div className="row justify-content-between align-items-center">
 
               <div className="col-auto">
-                <Link><a href="/">
-                  <img src="/static/dodge-aspen.png" style={{width: 100}}/>
-                </a></Link>
-              </div>
-
-              <div className="col-auto pl-0 d-none d-md-inline">
-                <Link><a href="/" className="text-dark">
-                  <h4 className="pt-0 m-0">Aspen</h4>
-                </a></Link>
+                <a href="/">
+                  <h4 className="m-0">
+                    <span className="fa fa-leaf text-success"/>
+                    <span className="d-none d-md-inline text-dark pt-0 my-0 ml-1">Aspen</span>
+                  </h4>
+                </a>
               </div>
 
               <input className="col px-2"
@@ -229,7 +226,7 @@ class SearchBar extends React.Component {
                 onChange={this.handleImmediateChange}
               />
               <label htmlFor="sloppyCheckbox" className="d-none d-md-inline">Sloppy</label>
-              <label htmlFor="sloppyCheckbox" className="d-inline d-md-none">S</label>
+              <label htmlFor="sloppyCheckbox" className="d-inline d-md-none mr-1">S</label>
             </div>
 
           </div>
@@ -352,9 +349,9 @@ export default class Index extends React.Component {
         page: page && page > 0 ? page + 1 : undefined,
         sloppy: sloppy ? 1 : undefined
       })
+      this.props.url.push('/?' + queryString)
       const response = await fetch(getOrigin() + '/search?' + queryString)
       const results = await response.json()
-      this.props.url.push('/?' + queryString)
       this.setState({ results: results })
     } finally {
       this.setState({ inProgress: false })
