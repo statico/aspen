@@ -27,7 +27,7 @@ export default class Index extends React.Component {
       page: page && page > 0 ? page : 0,
       sloppy: !!sloppy,
       results: null,
-      inProgress: false,
+      inProgress: !!query, // Make sure the shows a spinner instead of "0 results found" on load.
       drillDownResultId: null
     }
 
