@@ -1,45 +1,48 @@
 import React from 'react'
 
-export default class Pagination extends React.PureComponent {
-
+class PageItem extends React.PureComponent {
   render () {
-    const { currentPage, totalPages } = this.props
-    const hasPreviousPage = currentPage > 0
-    const hasNextPage = currentPage < totalPages - 1
+    const { enabled, page, onSelectPage, icon, text } = this.props
+    return (
+      <li className={'page-item ' + (enabled ? '' : 'disabled')} key={icon || text}>
+        <a href="#" className="page-link"
+          tabIndex={enabled ? null : -1}
+          onClick={(e) => { this.props.onSelectPage(page); e.preventDefault() }}
+        >
+          {icon && <span className={'fa fa-'+icon}/>}
+          {text && text}
+        </a>
+      </li>
+    )
+  }
+}
 
-    // Since the pagination can get unweildly with, say, 100 pages, only show 10 or so buttons.
+export default class Pagination extends React.PureComponent {
+  render () {
+    const { currentPage, totalPages, onSelectPage } = this.props
+
+    // Since the pagination can get unweildly with, say, 100 pages, only show 10 or so buttons with
+    // the currently selected page in the middle.
     const [firstPage, lastPage] =
       (currentPage < 5) ? [0, Math.min(totalPages, 9)] :
       (currentPage > (totalPages - 6)) ? [Math.max(0, totalPages - 10), totalPages] :
       [currentPage - 5, currentPage + 5]
+
     const pages = Array.from(new Array(lastPage - firstPage), (v, i) => firstPage + i)
 
     return (
       <ul className="pagination justify-content-center">
-
-        <li className={'page-item ' + (hasPreviousPage ? '' : 'disabled')} key="previous">
-          <a href="#" className="page-link"
-            tabIndex={hasPreviousPage ? null : -1}
-            onClick={() => { this.props.onSelectPage(currentPage - 1); e.preventDefault() }}
-          ><span className="fa fa-angle-left"/></a>
-        </li>
-
+        <PageItem onSelectPage={onSelectPage}
+          icon="angle-left" enabled={currentPage > 0} page={currentPage - 1}
+        />
         {pages.map(i => {
-          return <li className={'page-item ' + (i === currentPage ? 'disabled' : '')} key={i}>
-            <a href="#" className="page-link"
-              tabIndex={i === currentPage ? -1 : null}
-              onClick={(e) => { this.props.onSelectPage(i); e.preventDefault() }}
-            >{i + 1}</a>
-          </li>
+          return <PageItem onSelectPage={onSelectPage}
+            text={i+1} enabled={i !== currentPage} page={i}
+          />
         })}
-
-        <li className={'page-item ' + (hasNextPage ? '' : 'disabled')} key="next">
-          <a href="#" className="page-link"
-            tabIndex={hasNextPage ? null : -1}
-            onClick={(e) => { this.props.onSelectPage(currentPage + 1); e.preventDefault() }}
-          ><span className="fa fa-angle-right"/></a>
-        </li>
-
+        <PageItem onSelectPage={onSelectPage}
+          icon="angle-right" enabled={currentPage < totalPages - 1} page={currentPage + 1}
+        />
       </ul>
     )
   }
