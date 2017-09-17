@@ -22,6 +22,7 @@ export default class SearchBar extends React.Component {
   handleImmediateChange (event) {
     clearTimeout(this.timer)
     this.props.onSearch(this.state)
+    // Don't reload the page if this came from an onSubmit.
     if (event.target.tagName.toLowerCase() === 'form') event.preventDefault()
   }
 

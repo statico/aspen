@@ -79,6 +79,7 @@ export default class DrillDownOverlay extends React.Component {
         `}</style>
         <div className="modal-dialog" role="document" onClick={e => e.stopPropagation()}>
           <div className="modal-content">
+
             <div className="modal-header">
               <h5 className="modal-title mr-auto">{hit._source.path}</h5>
               <a className="btn btn-secondary d-none d-md-inline ml-3" href={this.url} onClick={this.props.onDismiss} target="_new">
@@ -90,6 +91,7 @@ export default class DrillDownOverlay extends React.Component {
                 <span className="d-none d-lg-inline ml-2">Close</span>
               </button>
             </div>
+
             <div className="modal-header justify-content-start">
               <div className="btn-group">
                 <button className="btn btn-secondary"
@@ -112,15 +114,18 @@ export default class DrillDownOverlay extends React.Component {
                 of {this.props.hit.highlight_locations.length}
               </span>
             </div>
+
             {!contentWithMarkup && <div className="modal-body text-center m-3">
               <span className="fa fa-spin fa-circle-o-notch"/>
             </div>}
+
             {contentWithMarkup && <div className="modal-body">
               <pre
                 ref={(el) => { this.contentViewer = el }}
                 dangerouslySetInnerHTML={{__html: contentWithMarkup}}
               />
             </div>}
+
           </div>
         </div>
       </div>
