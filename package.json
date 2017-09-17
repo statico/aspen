@@ -3,13 +3,13 @@
   "description": "Search engine for a large corpus of plaintext documents",
   "author": "Ian Langworth",
   "license": "MIT",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "repository": "git@github.com:statico/aspen.git",
   "private": true,
   "scripts": {
-    "dev": "node server",
+    "dev": "node server.js",
     "build": "next build",
-    "start": "next start"
+    "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
     "chalk": "^2.1.0",

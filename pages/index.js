@@ -361,14 +361,14 @@ export default class Index extends React.Component {
 
   render () {
     const { query, page, sloppy, inProgress, results, drillDownResultId } = this.state
-    const totalPages = results && Math.ceil(results.hits.total / ITEMS_PER_PAGE)
+    const totalPages = results && Math.ceil(results.hits.total / RESULTS_PER_PAGE)
     return <div>
 
       <Head>
         <title>{ query ? `${query} -` : '' } Aspen</title>
-        <meta name="robots" content="noindex, nofollow"/>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"/>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+        <link rel="shortcut icon" href="/static/favicon.png"/>
       </Head>
 
       <style global jsx>{`
