@@ -262,7 +262,7 @@ class Pagination extends React.PureComponent {
         <li className={'page-item ' + (hasPreviousPage ? '' : 'disabled')} key="previous">
           <a href="#" className="page-link"
             tabIndex={hasPreviousPage ? null : -1}
-            onClick={() => { this.props.onSelectPage(currentPage - 1); e.stopPropagation() }}
+            onClick={() => { this.props.onSelectPage(currentPage - 1); e.preventDefault() }}
           ><span className="fa fa-angle-left"/></a>
         </li>
 
@@ -270,7 +270,7 @@ class Pagination extends React.PureComponent {
           return <li className={'page-item ' + (i === currentPage ? 'disabled' : '')} key={i}>
             <a href="#" className="page-link"
               tabIndex={i === currentPage ? -1 : null}
-              onClick={(e) => { this.props.onSelectPage(i) }}
+              onClick={(e) => { this.props.onSelectPage(i); e.preventDefault() }}
             >{i + 1}</a>
           </li>
         })}
@@ -278,7 +278,7 @@ class Pagination extends React.PureComponent {
         <li className={'page-item ' + (hasNextPage ? '' : 'disabled')} key="next">
           <a href="#" className="page-link"
             tabIndex={hasNextPage ? null : -1}
-            onClick={(e) => { this.props.onSelectPage(currentPage + 1); e.stopPropagation() }}
+            onClick={(e) => { this.props.onSelectPage(currentPage + 1); e.preventDefault() }}
           ><span className="fa fa-angle-right"/></a>
         </li>
 
@@ -289,8 +289,8 @@ class Pagination extends React.PureComponent {
 
 export default class Index extends React.Component {
 
-  static async getInitialProps ({ req }) {
-    let { query, page, sloppy } = req.query
+  static async getInitialProps (props) {
+    let { query, page, sloppy } = props.query
     return { query, page, sloppy }
   }
 
@@ -298,7 +298,7 @@ export default class Index extends React.Component {
     super(props)
 
     const { query, sloppy } = props
-    const page = Number(props.page)
+    const page = (Number(props.page) || 1) - 1 // 'page' query param is 1-indexed
     this.state = {
       query,
       page: page && page > 0 ? page : 0,
@@ -349,11 +349,12 @@ export default class Index extends React.Component {
       this.setState({ inProgress: true })
       const queryString = qs.stringify({
         query,
-        page: page && page !== 0 ? page : undefined,
+        page: page && page > 0 ? page + 1 : undefined,
         sloppy: sloppy ? 1 : undefined
       })
       const response = await fetch(getOrigin() + '/search?' + queryString)
       const results = await response.json()
+      this.props.url.push('/?' + queryString)
       this.setState({ results: results })
     } finally {
       this.setState({ inProgress: false })

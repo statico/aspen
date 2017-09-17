@@ -17,7 +17,7 @@ async function main () {
   server.get('/search', async (req, res) => {
     res.header('Cache-Control', 'no-cache')
     const query = req.query.query
-    const page = Number(req.query.page) || 0
+    const page = (Number(req.query.page) || 1) - 1 // 'page' query param is 1-indexed
     const sloppy = !!req.query.sloppy
     let results
     try {
@@ -31,7 +31,7 @@ async function main () {
 
   server.get('/', (req, res) => {
     const query = req.query.query
-    const page = Number(req.query.page) || 0
+    const page = (Number(req.query.page) || 1) - 1 // 'page' query param is 1-indexed
     const sloppy = !!req.query.sloppy
     const params = { query, page, sloppy }
     return handle(req, res, null, params)
