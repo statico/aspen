@@ -6,17 +6,63 @@ import qs from 'qs'
 import { ITEMS_PER_PAGE, getOrigin } from '../lib/utils'
 import { pluralize } from 'humanize-plus'
 
+class DrillDownOverlay extends React.Component {
+
+  constructor (props) {
+    super(props)
+    this.state = {
+    }
+  }
+
+  render () {
+    const { hit } = this.props
+    return (
+      <div>
+        <style jsx>{`
+          .overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: rgba(0,0,0,.87);
+            color: #fafafa;
+            z-index: 100;
+            cursor: pointer;
+          }
+          .viewer {
+            width: 600px;
+            background: #fafafa;
+            color: #111;
+          }
+          @media (max-width: 600px) {
+            .viewer { width: 90% }
+          }
+        `}</style>
+        <div className="overlay row justify-content-center py-3" onClick={this.props.onDismiss}>
+          <div className="viewer col-auto rounded">
+            hey
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+}
+
 class SearchResult extends React.Component {
   render () {
-    const r = this.props // See Elasticsearch for how results are returned.
-    const highlight = r.highlight && (r.highlight['text'] || r.highlight['text.english'])
+    const { hit } = this.props // See Elasticsearch for how results are returned.
+    const highlight = hit.highlight && (hit.highlight['text'] || hit.highlight['text.english'])
     return (
-      <div className="result">
-        <style>{`
+      <div className="result" onClick={this.props.onClick || null}>
+        <style jsx>{`
+          div { cursor: pointer }
+          div:hover strong { text-decoration: underline; color #007bff }
           mark { background: transparent; color: #b00; font-weight: bold }
         `}</style>
-        <strong>{r._source.title || r._source.path}</strong>
-        <small className="ml-2 text-secondary">{r._source.path}</small>
+        <strong>{hit._source.title || hit._source.path}</strong>
+        <small className="ml-2 text-secondary">{hit._source.path}</small>
         <br/>
         <p dangerouslySetInnerHTML={{__html: highlight}}/>
       </div>
@@ -130,10 +176,13 @@ export default class Index extends React.Component {
       page: page && page > 1 ? page : 1,
       sloppy: !!sloppy,
       results: null,
-      inProgress: false
+      inProgress: false,
+      drillDownResultId: null
     }
 
     this.handleSearch = this.handleSearch.bind(this)
+    this.handleResultClick = this.handleResultClick.bind(this)
+    this.handleDrillDownDismiss = this.handleDrillDownDismiss.bind(this)
   }
 
   componentDidMount () {
@@ -142,6 +191,14 @@ export default class Index extends React.Component {
 
   handleSearch (newState) {
     this.setState(newState, () => { this.doSearch() })
+  }
+
+  handleResultClick (hitId) {
+    this.setState({ drillDownResultId: hitId })
+  }
+
+  handleDrillDownDismiss () {
+    this.setState({ drillDownResultId: null })
   }
 
   async doSearch () {
@@ -168,7 +225,7 @@ export default class Index extends React.Component {
   }
 
   render () {
-    const { query, page, sloppy, inProgress, results } = this.state
+    const { query, page, sloppy, inProgress, results, drillDownResultId } = this.state
     const totalPages = results && Math.ceil(results.hits.total / ITEMS_PER_PAGE)
     return <div>
 
@@ -189,7 +246,7 @@ export default class Index extends React.Component {
         a { cursor: pointer }
         label { font-weight: normal; cursor: pointer }
       `}</style>
-      <style jsx>{`
+      <style>{`
         section { margin-bottom: 1rem }
       `}</style>
 
@@ -218,7 +275,10 @@ export default class Index extends React.Component {
       </div>}
 
       {query && results && <div className="container results">
-        {results.hits.hits.map(r => <SearchResult {...r} key={r._id} />)}
+        {results.hits.hits.map(hit => <div key={hit._id}>
+          <SearchResult hit={hit} onClick={() => { this.handleResultClick(hit._id) }}/>
+          {drillDownResultId == hit._id && <DrillDownOverlay hit={hit} onDismiss={this.handleDrillDownDismiss}/>}
+        </div>)}
       </div>}
 
       {<div className="container"><div className="card"><div className="card-body">
