@@ -87,9 +87,9 @@ class DrillDownOverlay extends React.Component {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title mr-auto">{hit._source.path}</h5>
-              <a className="btn btn-secondary d-none d-md-inline ml-3" href={this.url} onClick={this.props.onDismiss}>
+              <a className="btn btn-secondary d-none d-md-inline ml-3" href={this.url} onClick={this.props.onDismiss} target="_new">
                 <span className="fa fa-external-link"></span>
-                <span className="d-none d-lg-inline ml-2">Open</span>
+                <span className="d-none d-lg-inline ml-2">View File</span>
               </a>
               <button className="btn btn-secondary ml-3" onClick={this.props.onDismiss}>
                 <span className="fa fa-close"></span>
