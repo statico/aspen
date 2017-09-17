@@ -13,10 +13,11 @@ class SearchResult extends React.Component {
     return (
       <div className="result">
         <style>{`
-          mark { font-weight: bold }
+          mark { background: transparent; color: #b00; font-weight: bold }
         `}</style>
-        <div><strong>{r._source.title || r._source.path}</strong></div>
-        <div><small className="text-secondary">{r._source.path}</small></div>
+        <strong>{r._source.title || r._source.path}</strong>
+        <small className="ml-2 text-secondary">{r._source.path}</small>
+        <br/>
         <p dangerouslySetInnerHTML={{__html: highlight}}/>
       </div>
     )

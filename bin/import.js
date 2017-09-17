@@ -1,64 +1,71 @@
 #!/usr/bin/env node
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 
-const async = require('async');
-const colors = require('colors');
-const commander = require('commander');
-const fs = require('fs');
-const pathlib = require('path');
-
-const {esUpload, esReset} = require('../lib/elasticsearch');
-const {walk} = require('../lib/walker');
-const {extractTitle} = require('../lib/plaintext');
+const chalk = require('chalk')
+const commander = require('commander')
+const elasticsearch = require('../lib/elasticsearch')
+const fs = require('fs')
+const pathIsInside = require('path-is-inside')
+const walklib = require('walk')
+const { extractTitle } = require('../lib/plaintext')
+const { join, relative, resolve } = require('path')
 
 commander
-  .version('0.0.1')
-  .usage('<subdirs ...>')
-  .option('-d, --basedir <path>', 'Set the path to static/data/', __dirname + '/../static/data')
-  .option('-c, --concurrency <n>', 'Limit indexing to this many docs at once', 5)
-  .parse(process.argv);
+  .description('Import one or more files or directories in static/data. Will import everything if not given any arguments..')
+  .usage('[<file | directory> [...]]')
+  .option('-d, --basedir <path>', 'Set the path to static/data', join(__dirname, '../static/data'))
+  .parse(process.argv)
 
-const {basedir, concurrency} = commander;
-const subdirs = commander.args;
+const { basedir } = commander
+console.log(chalk.yellow('→'), `Base directory is ${basedir}`)
 
-const indexfn = ({relpath, fullpath}, done) =>
-  extractTitle(fullpath, title =>
-    esUpload(basedir, fullpath, title, function(err) {
-      if (err) {
-        console.error("✗ ".red, err);
-      } else {
-        console.log("✓ ".green, `${ relpath }`, `-> ${ title }`.bold.blue);
-      }
-      return done();
-    })
-  )
-;
-
-const queue = async.queue(indexfn, concurrency);
-
-const walkfn = (relpath, fullpath) =>
-  queue.push({relpath, fullpath}, function(err) {
-    if (err) { return console.error(`Couldn't push to queue: ${ err }`.red); }
-  })
-;
-
-if (subdirs.length) {
-  for (let dir of Array.from(subdirs)) {
-    const path = pathlib.join(basedir, dir);
-    if (fs.statSync(path).isDirectory()) {
-      walk(basedir, dir, walkfn);
-    } else {
-      const relpath = pathlib.relative(basedir, path);
-      const fullpath = pathlib.resolve(basedir, path);
-      queue.push({relpath, fullpath});
-    }
+async function upload (path) {
+  try {
+    const title = await extractTitle(path)
+    await elasticsearch.upload(basedir, path, title)
+    console.log(chalk.green('→'), `${relative(basedir, path)}`, chalk.bold.blue(`→ ${title}`))
+  } catch (err) {
+    console.error(chalk.red('✗'), err)
   }
-} else {
-  walk(basedir, walkfn);
 }
 
+function walk (dir, fn) {
+  return new Promise((resolve, reject) => {
+    let paths = []
+    let walker = walklib.walk(dir, { followLinks: true })
+    walker.on('file', (root, stat, next) => {
+      paths.push(join(root, stat.name))
+      next()
+    })
+    walker.on('errors', (root, stat, next) => {
+      stats.forEach((stat) => { console.error(chalk.red('✗'), `Error for ${stat.name}: ${stat.error}`) })
+      next()
+    })
+    walker.on('end', () => {
+      resolve(paths)
+    })
+  })
+}
+
+(async function () {
+  try {
+    let args = commander.args.length > 0 ? commander.args : [basedir]
+    for (let arg of args) {
+      let path = resolve(arg)
+      if (!fs.existsSync(path)) path = join(resolve(basedir), arg)
+      if (!fs.existsSync(path)) throw new Error(`Can't find ${arg} here or in ${basedir}`)
+      if (!pathIsInside(path, basedir)) throw new Error(`Path ${arg} must be within ${basedir}`)
+      if (fs.statSync(path).isDirectory()) {
+        let paths = await walk(path)
+        for (let p of paths) {
+          await upload(p)
+        }
+      } else {
+        await upload(path)
+      }
+    }
+    console.log(chalk.green('✓'), 'Done!')
+  } catch (err) {
+    console.error(chalk.red('✗'), err.toString())
+    process.exit(1)
+  }
+})()
