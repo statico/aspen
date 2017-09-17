@@ -78,8 +78,11 @@ class DrillDownOverlay extends React.Component {
           .modal { background: rgba(0,0,0,.5) }
           .modal-content, .modal-body { max-height: 90vh }
           .modal-body { overflow-y: scroll; overflow-x: auto }
+          @media (min-width: 768px) {
+            .modal-dialog { width: 90%; max-width:1200px }
+          }
         `}</style>
-        <div className="modal-dialog modal-lg" role="document" onClick={e => e.stopPropagation()}>
+        <div className="modal-dialog" role="document" onClick={e => e.stopPropagation()}>
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title mr-auto">{hit._source.path}</h5>
@@ -114,6 +117,9 @@ class DrillDownOverlay extends React.Component {
                 of {this.props.hit.highlight_locations.length}
               </span>
             </div>
+            {!contentWithMarkup && <div className="modal-body text-center m-3">
+              <span className="fa fa-spin fa-circle-o-notch"/>
+            </div>}
             {contentWithMarkup && <div className="modal-body">
               <pre
                 ref={(el) => { this.contentViewer = el }}
