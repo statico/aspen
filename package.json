@@ -7,14 +7,9 @@
   "repository": "git@github.com:statico/aspen.git",
   "private": true,
   "scripts": {
-    "dev": "node server.js",
+    "dev": "node server",
     "build": "next build",
-    "start": "next start",
-    "convert": "bin/convert.sh",
-    "import": "node bin/import.js",
-    "fixup": "node bin/fixup.js",
-    "es-reset": "node bin/es-reset.js",
-    "tika": "bin/tika.sh"
+    "start": "next start"
   },
   "dependencies": {
     "chalk": "^2.1.0",

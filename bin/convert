@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # Usage: ./convert.sh static/data/SomeDir/*.rtf
 #
