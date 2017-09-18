@@ -4,7 +4,7 @@ class PageItem extends React.PureComponent {
   render () {
     const { enabled, page, onSelectPage, icon, text } = this.props
     return (
-      <li className={'page-item ' + (enabled ? '' : 'disabled')} key={icon || text}>
+      <li className={'page-item ' + (enabled ? '' : 'disabled')}>
         <a href="#" className="page-link"
           tabIndex={enabled ? null : -1}
           onClick={(e) => { this.props.onSelectPage(page); e.preventDefault() }}
@@ -36,7 +36,7 @@ export default class Pagination extends React.PureComponent {
           icon="angle-left" enabled={currentPage > 0} page={currentPage - 1}
         />
         {pages.map(i => {
-          return <PageItem onSelectPage={onSelectPage}
+          return <PageItem onSelectPage={onSelectPage} key={i}
             text={i+1} enabled={i !== currentPage} page={i}
           />
         })}
