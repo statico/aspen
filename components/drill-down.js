@@ -1,4 +1,5 @@
 import React from 'react'
+import fetch from 'isomorphic-unfetch'
 import { getOrigin } from '../lib/utils'
 
 export default class DrillDownOverlay extends React.Component {
@@ -21,7 +22,7 @@ export default class DrillDownOverlay extends React.Component {
   }
 
   async componentDidMount () {
-    const res = await fetch(this.url)
+    const res = await fetch(this.url, { credentials: 'include' })
     const content = await res.text()
     this.setState({ content }, () => {
       this.setLocation(0)
