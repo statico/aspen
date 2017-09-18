@@ -76,7 +76,7 @@ export default class Index extends React.Component {
         sloppy: sloppy ? 1 : undefined
       })
       Router.push('/?' + queryString)
-      const response = await fetch(getOrigin() + '/search?' + queryString)
+      const response = await fetch(getOrigin() + '/search?' + queryString, { credentials: 'include' })
       const results = await response.json()
       this.setState({ results: results })
     } finally {
