@@ -19,6 +19,8 @@ Put all your files in one place. This directory will be served via `/static/data
 $ mkdir ~/ebooks
 ```
 
+**Sometimes plaintext documents act weird.** Maybe `bin/import` can't extract a title or maybe the search highlights are off. The file might have the wrong line endings or one of those annoying [UTF-8 BOM headers](https://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom). Try running [dos2unix](http://dos2unix.sourceforge.net/) on your text files to fix them.
+
 **If you have non-plaintext documents, like PDFs and MSWord,** use the included `convert` utility to convert them to plaintext. Pass it a filename relative to your data directory:
 
 ```
