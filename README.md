@@ -152,7 +152,7 @@ $ docker run --name elasticsearch -d --restart=always --net=aspen -e "JAVA_OPTS=
 
 ## Development Notes
 
-- This started as an Angular 1 + CoffeeScript example. I recently migrated it to use Next.js, ES6 and React. You can view a full diff [here](https://github.com/statico/aspen/compare/master...next).
+- This started as an Angular 1 + CoffeeScript example. I recently migrated it to use Next.js, ES6 and React. You can view a full diff [here](https://github.com/statico/aspen/compare/4af174d...next).
 - I'm still using Elasticsearch 1.7 because I haven't bothered to learn the newer versions.
 
 ## Links
