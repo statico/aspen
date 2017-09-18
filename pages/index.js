@@ -27,6 +27,7 @@ export default class Index extends React.Component {
       page: page && page > 0 ? page : 0,
       sloppy: !!sloppy,
       results: null,
+      error: null,
       inProgress: !!query, // Make sure the shows a spinner instead of "0 results found" on load.
       drillDownResultId: null
     }
@@ -77,15 +78,28 @@ export default class Index extends React.Component {
       })
       Router.push('/?' + queryString)
       const response = await fetch(getOrigin() + '/search?' + queryString, { credentials: 'include' })
-      const results = await response.json()
-      this.setState({ results: results })
+      const obj = await response.json()
+      if (obj.error) {
+        // Elasticsearch will complain about broken queries, like '"foo' (missing a double quote)
+        if (/QueryParsingException/.test(obj.error)) {
+          obj.error = <span>
+            That search query looks incomplete. Please see the {' '}
+            <a href="https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-query-string-query.html#query-string-syntax" target="_new">Elasticsearch 1.7 query string documentation</a>.
+          </span>
+        }
+        this.setState({ error: obj.error, results: null })
+      } else {
+        this.setState({ error: null, results: obj })
+      }
+    } catch (err) {
+      this.setState({ error: err })
     } finally {
       this.setState({ inProgress: false })
     }
   }
 
   render () {
-    const { query, page, sloppy, inProgress, results, drillDownResultId } = this.state
+    const { query, page, sloppy, inProgress, results, drillDownResultId, error } = this.state
     const totalPages = results && Math.ceil(results.hits.total / RESULTS_PER_PAGE)
     return <div>
 
@@ -111,21 +125,21 @@ export default class Index extends React.Component {
 
       {query && <div className="container">
 
-        {results && results.error && <div className="alert alert-danger mb-3">
-          Error: {results.error}
+        {error && <div className="alert alert-danger mb-3">
+          Error: {error}
         </div>}
 
         {inProgress && <div className="text-secondary mb-3">
           <span className="fa fa-spin fa-circle-o-notch"/>
         </div>}
 
-        {!inProgress && results && results.hits.total > 0 && <div className="text-success mb-3">
+        {!inProgress && !error && results && results.hits.total > 0 && <div className="text-success mb-3">
           {results.hits.total} {pluralize(results.hits.total, 'result')} found. {' '}
           Page {page + 1} of {totalPages}. {' '}
           Search took {Number(results.took/1000).toFixed(1)} seconds.
         </div>}
 
-        {!inProgress && !totalPages && query && <div className="text-danger mb-3">
+        {!inProgress && !error && !totalPages && query && <div className="text-danger mb-3">
           0 results found for query: {query}
         </div>}
 
