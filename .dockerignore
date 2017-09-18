@@ -1,5 +1,6 @@
-bower_components
+.DS_Store
+.git
+.next
 node_modules
 npm-debug.log
 static/data
-.git
