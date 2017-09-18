@@ -2,42 +2,50 @@
 
 - Web app to search a large corpus of plain text files
 - Lets you deep dive into search results without leaving the browser
-- Powerful search query support
+- Powerful search query support through [Elasticsearch query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-query-string-query.html#query-string-syntax)
 - Performs some basic cleanup of plaintext data and can extract document titles
 - Responsive UI that works on mobile
 - Runs in Docker
 
-[![example](http://imgur.com/vvopYzB.gif)](http://imgur.com/vvopYzB)
+[![example](https://imgur.com/30X4t9A.gif)](https://imgur.com/30X4t9A)
 
-## Getting Started
+## Getting Started using Docker
 
-### 1. Symlink your documents directory into static/data
+#### 1. Set up your data directory
 
-```
-$ ln -s $HOME/ebooks static/data
-$ ls static/data/
-VOLUME1.txt VOLUME2.txt VOLUME3.txt
-```
-
-**If you have non-plaintext documents, like PDFs and MSWord,** use the convert utility to convert them to plaintext:
+Put all your files in one place. This directory will be served via `/static/data/` on the web server.
 
 ```
-$ docker run -it --rm -v ~/ebooks:/aspen/static/data statico/aspen convert static/data/Something.docx
+$ mkdir ~/ebooks
 ```
 
-**Need plaintext documents for testing?** Check out the [Top 100 eBooks on Project Gutenberg](https://www.gutenberg.org/browse/scores/top).
+**Sometimes plaintext documents act weird.** Maybe `bin/import` can't extract a title or maybe the search highlights are off. The file might have the wrong line endings or one of those annoying [UTF-8 BOM headers](https://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom). Try running [dos2unix](http://dos2unix.sourceforge.net/) on your text files to fix them.
 
-### 3. Run Elasticsearch
+**If you have non-plaintext documents, like PDFs and MSWord,** use the included `convert` utility to convert them to plaintext. Pass it a filename relative to your data directory:
 
-The easiest way is through [Docker](https://www.docker.com/). I've only ever tested Aspen with Elasticsearch 1.x.
+```
+$ ls ~/ebooks
+Something.docx
 
-Make a place to store corpus data:
+$ docker run --rm -v ~/ebooks:/data statico/aspen convert /data/Something.docx
+Creating /data/Test.txt...
++ exec java -jar /tika.jar --config=/aspen/config/tika.xml -m /data/Test.docx
+OK
+
+$ ls ~/ebooks
+Something.docx
+Something.txt
+```
+
+#### 2. Start and initialize Elasticsearch
+
+Make a place to store Elasticsearch corpus data:
 
 ```
 $ mkdir -p esdata
 ```
 
-Create a new Docker network so Elasticsearch and the webapp can communicate:
+Create a new Docker network so Elasticsearch and the web app can communicate:
 
 ```
 $ docker network create aspen
@@ -48,51 +56,87 @@ Run Elasticsearch:
 ```
 $ docker run --name elasticsearch -d --net=aspen -p 9200:9200 \
     -v $PWD/esdata:/usr/share/elasticsearch/data \
-    -v $PWD/esconfig:/usr/share/elasticsearch/config \
+    -v $PWD/config:/usr/share/elasticsearch/config \
     elasticsearch:1.7 --config=config/basic.yml
 ```
 
-If you `curl -s http://localhost:9200/` you should see something like `"status": 200`.
+Make sure it's up by running `curl localhost:9200` -- you should see something like `"status": 200`.
 
-Next, initialize and clear Elasticsearch:
-
-```
-$ docker run -it --rm --net=aspen -v ~/ebooks:/aspen/static/data statico/aspen es-reset
-```
-
-### 2. Import documents
-
-This imports everything in `static/data/` and is idempotent:
+Now clear and initialize Elasticsearch:
 
 ```
-$ docker run -it --rm --net=aspen -v ~/ebooks:/aspen/static/data statico/aspen import
+$ docker run --rm --net=aspen statico/aspen es-reset
 ```
 
-Alternatively, to only import a single folder or document, pass the filename relative to `static/data/`:
+#### 3. Import your documents
+
+This imports everything in `~/ebooks/` recursively and is idempotent:
 
 ```
-$ docker run -it --rm --net=aspen -v ~/ebooks:/aspen/static/data statico/aspen import SomeFolder/Something.txt
+$ docker run --rm --net=aspen -v ~/ebooks:/data statico/aspen import
 ```
 
-**Getting queue size errors from Elasticsearch?** Try setting the import concurrency to something lower, like `import -c 1`.
-
-### 3. Install dependencies
+Alternatively, to only import a single folder or document, pass the filename relative to your data directory, like this:
 
 ```
-$ npm install
-$ npm install -g bower
-$ bower install
+$ docker run --rm --net=aspen -v ~/ebooks:/data statico/aspen import foo/bar.txt
 ```
 
-### 4. Run the server
+#### 4. Start the web app
 
 ```
-$ npm run -s web
+$ docker run --name aspen -d --net=aspen -p 3000:3000 \
+    -v ~/ebooks:/data statico/aspen
 ```
 
-And go to http://localhost:8080/
+Now go to http://localhost:3000 and try your new search engine!
 
-## Running in Production
+## Getting Started with Local Development
+
+#### 1. Install dependencies
+
+It's easiest to use Elasticsearch via [Docker](https://www.docker.com/).
+
+You can get Node and Yarn via [Homebrew](https://brew.sh/) on Mac, or you can download [Node.js v8.5 or later](https://nodejs.org/en/download/) and `npm install -g yarn` to get Yarn.
+
+For document conversation (`bin/convert`) you'll want:
+
+1. [Apache Tika](https://tika.apache.org/)
+1. [UnRTF](https://www.gnu.org/software/unrtf/)
+1. [Par](http://www.nicemice.net/par/)
+
+On macOS you can `brew install node tika unrtf par`.
+
+#### 2. Clone the repo
+
+```
+$ git clone git@github.com:statico/aspen.git
+$ cd aspen
+$ yarn install
+```
+
+#### 3. Set up Elasticsearch and import your data
+
+See steps 1-3 in the above "Using Docker" section. In short, get your text files together in one place, set up Elasticsearch, and import them with the `bin/import` command.
+
+#### 4. Start the web app
+
+Aspen is built using [Next.js](https://github.com/zeit/next.js/), which is Node + ES6 + Express + React + hot reloading + lots more. Simply run:
+
+```
+$ yarn run dev
+```
+
+...and go to http://localhost:3000
+
+If you are working on `server.js` and want automatic server restarting, do:
+
+```
+$ yarn global add nodemon
+$ nodemon -w server.js -w lib -x yarn -- run dev
+```
+
+## Running in Production Using Docker
 
 Similar to development, but 
 
@@ -102,12 +146,16 @@ $ docker run --name aspen -d --restart=always --net=aspen -p 8900:8080 \
     -v ~/data/ebooks:/aspen/static/data statico/aspen
 $ docker run --name elasticsearch -d --restart=always --net=aspen -e "JAVA_OPTS=-server" \
     -v ~/data/esdata:/usr/share/elasticsearch/data \
-    -v ~/data/esconfig:/usr/share/elasticsearch/config \
+    -v ~/data/config:/usr/share/elasticsearch/config \
     elasticsearch:1.7 --config=config/basic.yml
 ```
+
+## Development Notes
+
+- This started as an Angular 1 + CoffeeScript example. I recently migrated it to use Next.js, ES6 and React. You can view a full diff [here](https://github.com/statico/aspen/compare/master...next).
+- I'm still using Elasticsearch 1.7 because I haven't bothered to learn the newer versions.
 
 ## Links
 
 * [Elasticsearch Guide](http://www.elasticsearch.org/guide/)
-* Michael Bromley's [angularUtils](https://github.com/michaelbromley/angularUtils) for its Angular pagination directive
-* `convert` requires: [Apache Tika](https://tika.apache.org/), [unrtf](https://www.gnu.org/software/unrtf/), and [par](http://www.nicemice.net/par/). (On Mac OS X, run `brew install tika unrtf par`)
+* [Elasticsearch 1.7 Reference](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/index.html)

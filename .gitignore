@@ -1,7 +1,7 @@
-bower_components
+.DS_Store
+.next
 esdata
 logs
 node_modules
-npm-debug.log
 static/data
 velocity.log

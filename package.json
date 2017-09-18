@@ -1,36 +1,29 @@
 {
   "name": "aspen",
-  "version": "0.0.1",
   "description": "Search engine for a large corpus of plaintext documents",
+  "author": "Ian Langworth",
+  "license": "MIT",
+  "version": "2.0.0",
   "repository": "git@github.com:statico/aspen.git",
   "private": true,
   "scripts": {
-    "web": "coffee app.coffee",
-    "syncup": "rsync -azv -e ssh --progress static/data/ lemon:data/ebooks/",
-    "syncdown": "rsync -azv -e ssh --progress lemon:data/ebooks/ static/data/"
-  },
-  "author": "Ian Langworth",
-  "license": "MIT",
-  "engines": {
-    "node": ">=0.10"
+    "dev": "node server.js",
+    "build": "next build",
+    "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
-    "async": "^0.9.0",
-    "body-parser": "^1.6.2",
-    "browserify": "^5.9.1",
-    "coffee-middleware": "^0.3",
-    "coffee-script": "^1.7.1",
-    "colors": "^1.0.3",
-    "commander": "^2.5.0",
-    "express": "^4.8.2",
-    "forever": "^0.11.1",
-    "jade": "^1.5.0",
-    "less-middleware": "^1.0.3",
-    "line-reader": "^0.2.4",
-    "morgan": "^1.2.2",
-    "nodemon": "^1.2.1",
-    "request": "^2.40.0",
-    "serve-index": "^1.1.6",
-    "walk": "^2.3.3"
+    "chalk": "^2.1.0",
+    "commander": "^2.11.0",
+    "express": "4.15.4",
+    "humanize-plus": "^1.8.2",
+    "isomorphic-unfetch": "2.0.0",
+    "line-reader": "^0.4.0",
+    "next": "3.0.6",
+    "path-is-inside": "^1.0.2",
+    "qs": "^6.5.1",
+    "react": "15.6.1",
+    "react-dom": "15.6.1",
+    "serve-index": "^1.9.0",
+    "walk": "^2.3.9"
   }
 }

@@ -1,23 +1,25 @@
-FROM ubuntu:16.04
+FROM ubuntu:latest
 
 RUN apt-get update
-RUN apt-get install -y unrtf par git openjdk-8-jre-headless
+RUN apt-get install -y unrtf par git openjdk-8-jre-headless curl
 
-ADD http://mirror.stjschools.org/public/apache/tika/tika-app-1.14.jar /tika.jar
+RUN curl -sL http://apache.mirrors.pair.com/tika/tika-app-1.16.jar >/tika.jar
 
-ENV NODE_VERSION 4.6.2
-ADD https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz /node.tar.gz
+ENV NODE_VERSION 8.5.0
+RUN curl -sL https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz >/node.tar.gz
 RUN tar -xzf /node.tar.gz -C /usr/local --strip-components=1 && rm /node.tar.gz
 
 COPY ./ /aspen/
 WORKDIR /aspen/
-RUN npm install --silent
-RUN npm install --silent --global bower && bower install --allow-root
+RUN npm install --silent --global yarn
+RUN yarn install --pure-lockfile --non-interactive
+RUN yarn run build
 
 ENV PATH=$PATH:/aspen/node_modules/.bin:/aspen/bin
 
-VOLUME /aspen/static/data
+RUN ln -s /data /aspen/static/data
+VOLUME /data
 
 EXPOSE 8080
 ENV ELASTICSEARCH_URL http://elasticsearch:9200
-CMD ["coffee", "app.coffee"]
+CMD ["yarn", "start"]

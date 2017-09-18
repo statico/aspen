@@ -1,49 +1,71 @@
-#!/usr/bin/env coffee
+#!/usr/bin/env node
 
-async = require 'async'
-colors = require 'colors'
-commander = require 'commander'
-fs = require 'fs'
-pathlib = require 'path'
-
-{esUpload, esReset} = require '../lib/elasticsearch'
-{walk} = require '../lib/walker'
-{extractTitle} = require '../lib/plaintext'
+const chalk = require('chalk')
+const commander = require('commander')
+const elasticsearch = require('../lib/elasticsearch')
+const fs = require('fs')
+const pathIsInside = require('path-is-inside')
+const walklib = require('walk')
+const extractTitle = require('../lib/extract-title')
+const { join, relative, resolve } = require('path')
 
 commander
-  .version('0.0.1')
-  .usage('<subdirs ...>')
-  .option('-d, --basedir <path>', 'Set the path to static/data/', __dirname + '/../static/data')
-  .option('-c, --concurrency <n>', 'Limit indexing to this many docs at once', 5)
+  .description('Import one or more files or directories in static/data. Will import everything if not given any arguments..')
+  .usage('[<file | directory> [...]]')
+  .option('-d, --basedir <path>', 'Set the path to static/data', join(__dirname, '../static/data'))
   .parse(process.argv)
 
-{basedir, concurrency} = commander
-subdirs = commander.args
+const { basedir } = commander
+console.log(chalk.yellow('→'), `Base directory is ${basedir}`)
 
-indexfn = ({relpath, fullpath}, done) ->
-  extractTitle fullpath, (title) ->
-    esUpload basedir, fullpath, title, (err) ->
-      if err
-        console.error "✗ ".red, err
-      else
-        console.log "✓ ".green, "#{ relpath }", "-> #{ title }".bold.blue
-      done()
+async function upload (path) {
+  try {
+    const title = await extractTitle(path)
+    await elasticsearch.upload(basedir, path, title)
+    console.log(chalk.green('→'), `${relative(basedir, path)}`, chalk.bold.blue(`→ ${title}`))
+  } catch (err) {
+    console.error(chalk.red('✗'), err)
+  }
+}
 
-queue = async.queue indexfn, concurrency
+function walk (dir, fn) {
+  return new Promise((resolve, reject) => {
+    let paths = []
+    let walker = walklib.walk(dir, { followLinks: true })
+    walker.on('file', (root, stat, next) => {
+      if ((/\.txt$/i).test(stat.name)) paths.push(join(root, stat.name))
+      else console.log(chalk.yellow('▲'), `Ignoring non-text path: ${stat.name}`)
+      next()
+    })
+    walker.on('errors', (root, stat, next) => {
+      stats.forEach((stat) => { console.error(chalk.red('✗'), `Error for ${stat.name}: ${stat.error}`) })
+      next()
+    })
+    walker.on('end', () => {
+      resolve(paths)
+    })
+  })
+}
 
-walkfn = (relpath, fullpath) ->
-  queue.push {relpath: relpath, fullpath: fullpath}, (err) ->
-    console.error "Couldn't push to queue: #{ err }".red if err
-
-if subdirs.length
-  for dir in subdirs
-    path = pathlib.join basedir, dir
-    if fs.statSync(path).isDirectory()
-      walk basedir, dir, walkfn
-    else
-      relpath = pathlib.relative basedir, path
-      fullpath = pathlib.resolve basedir, path
-      queue.push {relpath: relpath, fullpath: fullpath}
-else
-  walk basedir, walkfn
-
+(async function () {
+  try {
+    let args = commander.args.length > 0 ? commander.args : [basedir]
+    for (let arg of args) {
+      let path = resolve(arg)
+      if (!fs.existsSync(path)) path = join(resolve(basedir), arg)
+      if (!fs.existsSync(path)) throw new Error(`Can't find ${arg} here or in ${basedir}`)
+      if (!pathIsInside(path, basedir)) throw new Error(`Path ${arg} must be within ${basedir}`)
+      if (fs.statSync(path).isDirectory()) {
+        let paths = await walk(path)
+        for (let p of paths) {
+          await upload(p)
+        }
+      } else {
+        await upload(path)
+      }
+    }
+    console.log(chalk.green('✓'), 'Done!')
+  } catch (err) {
+    console.error(chalk.red('✗'), err.toString())
+    process.exit(1)
+  } })()
