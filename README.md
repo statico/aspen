@@ -1,11 +1,14 @@
 # Aspen
 
+[![license](https://img.shields.io/github/license/statico/aspen.svg?style=flat)](https://github.com/statico/aspen/blob/master/LICENSE)
+[![Docker Build Statu](https://img.shields.io/docker/automated/statico/aspen.svg?style=flat)](https://hub.docker.com/r/statico/aspen/)
+
 - Web app to search a large corpus of plain text files
 - Lets you deep dive into search results without leaving the browser
 - Powerful search query support through [Elasticsearch query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-query-string-query.html#query-string-syntax)
 - Performs some basic cleanup of plaintext data and can extract document titles
 - Responsive UI that works on mobile
-- Runs in Docker
+- Runs in [Docker](https://hub.docker.com/r/statico/aspen/)
 
 [![example](https://imgur.com/30X4t9A.gif)](https://imgur.com/30X4t9A)
 
