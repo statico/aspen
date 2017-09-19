@@ -104,13 +104,13 @@ export default class DrillDownOverlay extends React.Component {
                     onClick={this.goToPreviousLocation}
                     >
                   <span className="fa fa-angle-left"></span>
-                  <span className="d-none d-lg-inline ml-2">Previous</span>
+                  <span className="ml-2">Previous</span>
                 </button>
                 <button className="btn btn-secondary"
                     disabled={!this.canGoToNextLocation()}
                     onClick={this.goToNextLocation}
                     >
-                  <span className="d-none d-lg-inline mr-2">Next</span>
+                  <span className="mr-2">Next</span>
                   <span className="fa fa-angle-right"></span>
                 </button>
               </div>
