@@ -24,7 +24,22 @@ export default class DrillDownOverlay extends React.Component {
   async componentDidMount () {
     const res = await fetch(this.url, { credentials: 'include' })
     const content = await res.text()
-    this.setState({ content }, () => {
+
+    // Surround each highlight with <mark> tags, and also escape any existing markup (even though
+    // there shouldn't be any)
+    let markup = ''
+    let last = 0
+    for (let [start, end] of this.props.hit.highlight_locations) {
+      markup += content.substring(last, start) + '__STARTSPAN__' + content.substring(start, end) + '__ENDSPAN__'
+      last = end
+    }
+    markup += content.substring(last)
+    markup = markup
+      .replace(/</g, '&lt;')
+      .replace(/__STARTSPAN__/g, '<mark>')
+      .replace(/__ENDSPAN__/g, '</mark>')
+
+    this.setState({ contentWithMarkup: markup }, () => {
       this.setLocation(0)
     })
   }
@@ -44,24 +59,13 @@ export default class DrillDownOverlay extends React.Component {
 
   setLocation (newLocation) {
     this.setState({ currentLocation: newLocation }, () => {
-      const tuple = this.props.hit.highlight_locations[this.state.currentLocation]
-      if (tuple == null) return
-      const [start, end] = tuple
-
-      let content = this.state.content
-      content = content.substring(0, start) + '__STARTSPAN__' +
-        content.substring(start, end) + '__ENDSPAN__' +
-        content.substring(end)
-      content = content
-        .replace(/</g, '&lt;')
-        .replace('__STARTSPAN__', '<mark>')
-        .replace('__ENDSPAN__', '</mark>')
-
-      this.setState({ contentWithMarkup: content }, () => {
-        const container = this.contentViewer.parentElement
-        const mark = this.contentViewer.getElementsByTagName('mark')[0]
-        container.scrollTop = mark.offsetTop - 100
-      })
+      const container = this.contentViewer.parentElement
+      const mark = this.contentViewer.getElementsByTagName('mark')[newLocation]
+      if (!mark) {
+        console.warn(`Tried to scroll to mark ${newLocation} but it was null`)
+        return
+      }
+      container.scrollTop = mark.offsetTop - 100
     })
   }
 
