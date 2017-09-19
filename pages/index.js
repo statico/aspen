@@ -120,7 +120,7 @@ export default class Index extends React.Component {
         }
         button, .btn, a, label { cursor: pointer }
         label { font-weight: normal }
-        mark { background: transparent; color: #dc3545; font-weight: bold }
+        mark { background: transparent; color: #dc3545; font-weight: bold; padding: 0 }
       `}</style>
 
       <SearchBar query={query} sloppy={sloppy} onSearch={this.handleSearch}/>
