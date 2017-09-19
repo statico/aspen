@@ -39,6 +39,9 @@ export default class DrillDownOverlay extends React.Component {
       .replace(/__STARTSPAN__/g, '<mark>')
       .replace(/__ENDSPAN__/g, '</mark>')
 
+    // Markdown-style paragraphs
+    markup = markup.replace(/\n\n+/g, '<br/><br/>')
+
     this.setState({ contentWithMarkup: markup }, () => {
       this.setLocation(0)
     })
@@ -125,7 +128,7 @@ export default class DrillDownOverlay extends React.Component {
             </div>}
 
             {contentWithMarkup && <div className="modal-body">
-              <pre
+              <div
                 ref={(el) => { this.contentViewer = el }}
                 dangerouslySetInnerHTML={{__html: contentWithMarkup}}
               />
