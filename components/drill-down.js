@@ -75,6 +75,7 @@ export default class DrillDownOverlay extends React.Component {
   render () {
     const { hit } = this.props
     const { contentWithMarkup } = this.state
+    const directoryUrl = this.url.substring(0, this.url.lastIndexOf('/') + 1)
     return (
       <div className="modal fade show d-block" role="dialog" onClick={this.props.onDismiss}>
         <style jsx>{`
@@ -91,8 +92,12 @@ export default class DrillDownOverlay extends React.Component {
             <div className="modal-header">
               <h5 className="modal-title mr-auto">{hit._source.path}</h5>
               <a className="btn btn-secondary d-none d-md-inline ml-3" href={this.url} onClick={this.props.onDismiss} target="_new">
-                <span className="fa fa-external-link"></span>
+                <span className="fa fa-file"></span>
                 <span className="d-none d-lg-inline ml-2">View File</span>
+              </a>
+              <a className="btn btn-secondary d-none d-md-inline ml-3" href={directoryUrl} onClick={this.props.onDismiss} target="_new">
+                <span className="fa fa-folder-open"></span>
+                <span className="d-none d-lg-inline ml-2">Open Folder</span>
               </a>
               <button className="btn btn-secondary ml-3" onClick={this.props.onDismiss}>
                 <span className="fa fa-close"></span>
