@@ -1,5 +1,5 @@
 import React from 'react'
-import fetch from 'isomorphic-unfetch'
+import request from 'superagent'
 import { getOrigin } from '../lib/utils'
 
 export default class DrillDownOverlay extends React.Component {
@@ -22,8 +22,8 @@ export default class DrillDownOverlay extends React.Component {
   }
 
   async componentDidMount () {
-    const res = await fetch(this.url, { credentials: 'include' })
-    const content = await res.text()
+    const response = await request(this.url).withCredentials()
+    const content = response.text
 
     // Surround each highlight with <mark> tags, and also escape any existing markup (even though
     // there shouldn't be any)

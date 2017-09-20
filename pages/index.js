@@ -5,7 +5,7 @@ import Pagination from '../components/pagination.js'
 import React from 'react'
 import Router from 'next/router'
 import SearchBar from '../components/search-bar.js'
-import fetch from 'isomorphic-unfetch'
+import request from 'superagent'
 import qs from 'qs'
 import { RESULTS_PER_PAGE, getOrigin } from '../lib/utils'
 import { pluralize } from 'humanize-plus'
@@ -71,14 +71,25 @@ export default class Index extends React.Component {
 
     try {
       this.setState({ inProgress: true, results: null })
+
       const queryString = qs.stringify({
         query,
         page: page && page > 0 ? page + 1 : undefined,
         sloppy: sloppy ? 1 : undefined
       })
-      Router.push('/?' + queryString)
-      const response = await fetch(getOrigin() + '/search?' + queryString, { credentials: 'include' })
-      const obj = await response.json()
+
+      // If we're typing fast, don't add incomplete queries to browser history.
+      if (this.inFlightRequest) {
+        Router.replace('/?' + queryString)
+      } else {
+        Router.push('/?' + queryString)
+      }
+
+      if (this.inFlightRequest) this.inFlightRequest.abort()
+      const req = this.inFlightRequest = request.get(getOrigin() + '/search').query(queryString).withCredentials()
+      const response = await req
+      const obj = response.body
+
       if (obj.error) {
         // Elasticsearch will complain about broken queries, like '"foo' (missing a double quote)
         if (/QueryParsingException/.test(obj.error)) {
@@ -92,6 +103,7 @@ export default class Index extends React.Component {
         this.setState({ error: null, results: obj })
       }
     } catch (err) {
+      console.error(`Error during request: ${err}`)
       this.setState({ error: err })
     } finally {
       this.setState({ inProgress: false })
