@@ -101,7 +101,7 @@ export default class Index extends React.Component {
   render () {
     const { query, page, sloppy, inProgress, results, drillDownResultId, error } = this.state
     const totalPages = results && Math.ceil(results.hits.total / RESULTS_PER_PAGE)
-    return <div>
+    return <div className="pb-3">
 
       <Head>
         <title>{ query ? `${query} -` : '' } Aspen</title>
