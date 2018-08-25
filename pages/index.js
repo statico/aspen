@@ -177,6 +177,7 @@ export default class Index extends React.Component {
         Must contain "foo" and either "bar" or "quux": <code>foo (bar OR quux)</code><br/>
         Must contain "foo" but not "bar": <code>foo -bar</code><br/>
         Must contain the exact phrase, "the quick brown fox": <code>"the quick brown fox"</code><br/>
+        Must contain both "foo" and "bar" within 10 words of each other: <code>"foo bar"~10</code><br/>
         Search for foo but only in a certain folder: <code>path:"SomeFolder/5" foo</code>
       </div></div></div>}
 
