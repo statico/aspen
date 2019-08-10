@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  aspen:
+    image: statico/aspen
+    container_name: aspen
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    volumes:
+      - ~/ebooks:/data
+    ports:
+      - '3000:3000'
+
+  elasticsearch:
+    image: elasticsearch:1.7
+    container_name: elasticsearch
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+      - ./config:/usr/share/elasticsearch/config
+    expose:
+      - '9200'
+    command: elasticsearch --config=config/basic.yml
+
+volumes:
+  esdata:

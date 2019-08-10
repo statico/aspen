@@ -20,6 +20,5 @@ ENV PATH=$PATH:/aspen/node_modules/.bin:/aspen/bin
 RUN ln -s /data /aspen/static/data
 VOLUME /data
 
-EXPOSE 8080
-ENV ELASTICSEARCH_URL http://elasticsearch:9200
+EXPOSE 3000
 CMD ["yarn", "start"]

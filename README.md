@@ -1,100 +1,94 @@
 # Aspen
 
+Aspen lets you search a large corpus of plain text files via the browser.
+
 [![license](https://img.shields.io/github/license/statico/aspen.svg?style=flat)](https://github.com/statico/aspen/blob/master/LICENSE)
 [![Docker Build Statu](https://img.shields.io/docker/automated/statico/aspen.svg?style=flat)](https://hub.docker.com/r/statico/aspen/)
 
-- Web app to search a large corpus of plain text files
-- Lets you deep dive into search results without leaving the browser
+[![example](https://imgur.com/30X4t9A.gif)](https://imgur.com/30X4t9A)
+
 - Powerful search query support through [Elasticsearch query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-query-string-query.html#query-string-syntax)
 - Performs some basic cleanup of plaintext data and can extract document titles
 - Responsive UI that works on mobile
 - Runs in [Docker](https://hub.docker.com/r/statico/aspen/)
 
-[![example](https://imgur.com/30X4t9A.gif)](https://imgur.com/30X4t9A)
+## Getting Started using Docker Compose
 
-## Getting Started using Docker
+### 1. Collect your documents
 
-#### 1. Set up your data directory
-
-Put all your files in one place. This directory will be served via `/static/data/` on the web server.
+Put all your files in one place, like `~/ebooks/`:
 
 ```
-$ mkdir ~/ebooks
+$ tree ~/ebooks
+/Users/ian/ebooks
+└── Project\ Gutenberg/
+    ├── Beowulf.txt
+    ├── Dracula.txt
+    ├── Frankenstein.txt
 ```
 
-**Sometimes plaintext documents act weird.** Maybe `bin/import` can't extract a title or maybe the search highlights are off. The file might have the wrong line endings or one of those annoying [UTF-8 BOM headers](https://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom). Try running [dos2unix](http://dos2unix.sourceforge.net/) on your text files to fix them.
+### 2. Run Aspen & Elasticsearch
 
-**If you have non-plaintext documents, like PDFs and MSWord,** use the included `convert` utility to convert them to plaintext. Pass it a filename relative to your data directory:
+```
+$ docker-compose up -d
+Creating network "aspen_default" with the default driver
+Creating elasticsearch ... done
+Creating aspen         ... done
+```
+
+### 3. Convert any non-plaintext (PDFs, MS Word) documents to plaintext
+
+Use the included `convert` utility, which wraps [Apache Tika](https://tika.apache.org), to convert them to plaintext. Pass it a filename relative to your data directory:
 
 ```
 $ ls ~/ebooks
-Something.docx
+Project Gutenberg Test.docx
 
-$ docker run --rm -v ~/ebooks:/data statico/aspen convert /data/Something.docx
+$ docker-compose run aspen convert Test.docx
+Starting elasticsearch ... done
+Test.docx doesn't exist, trying /data/Test.docx
 Creating /data/Test.txt...
-+ exec java -jar /tika.jar --config=/aspen/config/tika.xml -m /data/Test.docx
+...
 OK
 
 $ ls ~/ebooks
-Something.docx
-Something.txt
+Project Gutenberg Test.docx         Test.txt
 ```
 
-#### 2. Start and initialize Elasticsearch
+#### 4. Import content into Elasticsearch
 
-Make a place to store Elasticsearch corpus data:
-
-```
-$ mkdir -p esdata
-```
-
-Create a new Docker network so Elasticsearch and the web app can communicate:
+Start by resetting Elasticsearch to make sure everything is working:
 
 ```
-$ docker network create aspen
+$ docker-compose run aspen es-reset
+Starting elasticsearch ... done
+Results from DELETE: { acknowledged: true }
+✓ Done.
 ```
 
-Run Elasticsearch:
+Now import all `.txt` documents. The `import` script will try to figure out the title of the document automatically:
 
 ```
-$ docker run --name elasticsearch -d --net=aspen -p 9200:9200 \
-    -v $PWD/esdata:/usr/share/elasticsearch/data \
-    -v $PWD/config:/usr/share/elasticsearch/config \
-    elasticsearch:1.7 --config=config/basic.yml
+$ docker-compose run aspen import
+Starting elasticsearch ... done
+→ Base directory is /aspen/static/data
+▲ Ignoring non-text path: Test.docx
+→ Test.txt → Test Document
+→ Project Gutenberg/Beowulf.txt → The Project Gutenberg EBook of Beowulf
+→ Project Gutenberg/Dracula.txt → The Project Gutenberg EBook of Dracula, by Bram Stoker
+→ Project Gutenberg/Frankenstein.txt → Project Gutenberg's Frankenstein, by Mary Wollstonecraft (Godwin) Shelley
+✓ Done!
 ```
 
-Make sure it's up by running `curl localhost:9200` -- you should see something like `"status": 200`.
+You can also run `import` with a directory or file name relative to the data directory. For example, `import Project\ Gutenberg` or `import Project\ Gutenberg\Dracula.txt`.
 
-Now clear and initialize Elasticsearch:
+**Sometimes plaintext documents act strangely.** Maybe `bin/import` can't extract a title or maybe the search highlights are off. The file might have the wrong line endings or one of those annoying [UTF-8 BOM headers](https://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom). Try running [dos2unix](http://dos2unix.sourceforge.net/) on your text files to fix them.
 
-```
-$ docker run --rm --net=aspen statico/aspen es-reset
-```
+#### 5. Done!
 
-#### 3. Import your documents
+Go to http://localhost:3000/ and start searching!
 
-This imports everything in `~/ebooks/` recursively and is idempotent:
-
-```
-$ docker run --rm --net=aspen -v ~/ebooks:/data statico/aspen import
-```
-
-Alternatively, to only import a single folder or document, pass the filename relative to your data directory, like this:
-
-```
-$ docker run --rm --net=aspen -v ~/ebooks:/data statico/aspen import foo/bar.txt
-```
-
-#### 4. Start the web app
-
-```
-$ docker run --name aspen -d --net=aspen -p 3000:3000 \
-    -v ~/ebooks:/data statico/aspen
-```
-
-Now go to http://localhost:3000 and try your new search engine!
-
-## Getting Started with Local Development
+## Development Setup
 
 #### 1. Install dependencies
 
@@ -120,7 +114,7 @@ $ yarn install
 
 #### 3. Set up Elasticsearch and import your data
 
-See steps 1-3 in the above "Using Docker" section. In short, get your text files together in one place, set up Elasticsearch, and import them with the `bin/import` command.
+See steps 1-4 in the above "Using Docker" section. In short, get your text files together in one place, set up Elasticsearch, and import them with the `bin/import` command.
 
 #### 4. Start the web app
 
@@ -139,20 +133,6 @@ $ yarn global add nodemon
 $ nodemon -w server.js -w lib -x yarn -- run dev
 ```
 
-## Running in Production Using Docker
-
-Similar to development, but 
-
-```
-$ docker network create aspen
-$ docker run --name aspen -d --restart=always --net=aspen -p 8900:8080 \
-    -v ~/data/ebooks:/aspen/static/data statico/aspen
-$ docker run --name elasticsearch -d --restart=always --net=aspen -e "JAVA_OPTS=-server" \
-    -v ~/data/esdata:/usr/share/elasticsearch/data \
-    -v ~/data/config:/usr/share/elasticsearch/config \
-    elasticsearch:1.7 --config=config/basic.yml
-```
-
 ## Development Notes
 
 - This started as an Angular 1 + CoffeeScript example. I recently migrated it to use Next.js, ES6 and React. You can view a full diff [here](https://github.com/statico/aspen/compare/4af174d...next).
@@ -160,5 +140,6 @@ $ docker run --name elasticsearch -d --restart=always --net=aspen -e "JAVA_OPTS=
 
 ## Links
 
-* [Elasticsearch Guide](http://www.elasticsearch.org/guide/)
-* [Elasticsearch 1.7 Reference](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/index.html)
+- [Elasticsearch Guide](http://www.elasticsearch.org/guide/)
+- [Elasticsearch 1.7 Reference](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/index.html)
+- [`tree` command](https://www.geeksforgeeks.org/tree-command-unixlinux/)
