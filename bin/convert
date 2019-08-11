@@ -38,7 +38,9 @@ for src in "$@" ; do
       $(dirname $0)/tika -m "$src"
       echo '---'
       echo
-      $(dirname $0)/tika -t "$src" | par
+      # Tika parses paragraphs properly, but when converting to text the paragraphs are lost. Make
+      # sure to insert extra newlines before we run it through par to preserve the paragraphs.
+      $(dirname $0)/tika -t "$src" | sed -e 's/$/\n/g' | par
     ) >"$tempfile"
     $(dirname $0)/fixup "$tempfile" >"$dest"
     echo "OK"
