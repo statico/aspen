@@ -22,7 +22,13 @@ export default class DrillDownOverlay extends React.Component {
   }
 
   async componentDidMount () {
-    const response = await request(this.url).withCredentials()
+    let response
+    try {
+      response = await request(this.url).withCredentials()
+    } catch (err) {
+      this.setState({ contentWithMarkup: `<pre class="text-danger">Request failed: ${err}</pre>` })
+      return
+    }
     const content = response.text
 
     // Surround each highlight with <mark> tags, and also escape any existing markup (even though
