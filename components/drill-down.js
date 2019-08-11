@@ -87,7 +87,7 @@ export default class DrillDownOverlay extends React.Component {
         <style jsx>{`
           .modal { background: rgba(0,0,0,.5) }
           .modal-content, .modal-body { max-height: 90vh }
-          .modal-body { overflow-y: scroll; overflow-x: auto }
+          .modal-body { overflow-y: scroll; overflow-x: auto; -webkit-overflow-scrolling: touch }
           @media (min-width: 768px) {
             .modal-dialog { width: 90%; max-width:1200px }
           }
