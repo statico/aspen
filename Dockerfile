@@ -3,7 +3,7 @@ FROM ubuntu:latest
 RUN apt-get update
 RUN apt-get install -y unrtf par git openjdk-8-jre-headless curl
 
-RUN curl -sL http://apache.mirrors.pair.com/tika/tika-app-1.22.jar >/tika.jar
+RUN curl -sL https://archive.apache.org/dist/tika/tika-app-1.22.jar >/tika.jar
 
 ENV NODE_VERSION 8.5.0
 RUN curl -sL https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz >/node.tar.gz
