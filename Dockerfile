@@ -12,7 +12,7 @@ RUN yarn run build
 
 ENV PATH=$PATH:/aspen/node_modules/.bin:/aspen/bin
 
-RUN mkdir -p /aspen/static/data && ln -sf /data /aspen/static/data
+RUN mkdir -p /aspen/public/data && ln -sf /data /aspen/public/data
 VOLUME /data
 
 EXPOSE 3000

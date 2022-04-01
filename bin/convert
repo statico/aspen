@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Usage: ./convert static/data/SomeDir/*.rtf
+# Usage: ./convert public/data/SomeDir/*.rtf
 #
 # Requires Apache Tika, unrtf and par. (Tika sucks at RTF->text.)
 # On Mac OS X, `brew install tika unrtf par`

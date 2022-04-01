@@ -39,8 +39,8 @@ async function main() {
   })
 
   server.use(
-    "/static/data",
-    serveIndex(join(__dirname, "static/data"), { icons: true })
+    "/data",
+    serveIndex(join(__dirname, "public/data"), { icons: true })
   )
 
   server.get("*", (req, res) => {
