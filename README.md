@@ -71,7 +71,7 @@ Now import all `.txt` documents. The `import` script will try to figure out the 
 ```
 $ docker-compose run aspen import
 Starting elasticsearch ... done
-→ Base directory is /aspen/public/data
+→ Base directory is /app/public/data
 ▲ Ignoring non-text path: Test.docx
 → Test.txt → Test Document
 → Project Gutenberg/Beowulf.txt → The Project Gutenberg EBook of Beowulf

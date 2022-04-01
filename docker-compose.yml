@@ -9,7 +9,7 @@ services:
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
     volumes:
-      - ~/ebooks:/data
+      - ~/ebooks:/app/public/data
     ports:
       - "3000:3000"
 
