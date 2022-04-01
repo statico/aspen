@@ -1,8 +1,8 @@
-version: '3'
+version: "3"
 
 services:
   aspen:
-    image: statico/aspen
+    image: ghcr.io/statico/aspen
     container_name: aspen
     depends_on:
       - elasticsearch
@@ -11,7 +11,7 @@ services:
     volumes:
       - ~/ebooks:/data
     ports:
-      - '3000:3000'
+      - "3000:3000"
 
   elasticsearch:
     image: elasticsearch:1.7
@@ -20,7 +20,7 @@ services:
       - esdata:/usr/share/elasticsearch/data
       - ./config:/usr/share/elasticsearch/config
     expose:
-      - '9200'
+      - "9200"
     command: elasticsearch --config=config/basic.yml
 
 volumes:

@@ -12,18 +12,18 @@
     "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
-    "chalk": "^2.1.0",
-    "commander": "^2.11.0",
-    "express": "4.15.4",
+    "chalk": "^5.0.1",
+    "commander": "^9.1.0",
+    "express": "4.17.3",
     "humanize-plus": "^1.8.2",
     "line-reader": "^0.4.0",
-    "next": "^4",
+    "next": "^12",
     "path-is-inside": "^1.0.2",
-    "qs": "^6.5.1",
-    "react": "16",
-    "react-dom": "16",
-    "serve-index": "^1.9.0",
-    "superagent": "^3.6.0",
-    "walk": "^2.3.9"
+    "qs": "^6.10.3",
+    "react": "18",
+    "react-dom": "18",
+    "serve-index": "^1.9.1",
+    "superagent": "^7.1.1",
+    "walk": "^2.3.15"
   }
 }
