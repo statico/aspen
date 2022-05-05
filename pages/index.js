@@ -168,7 +168,9 @@ export default class Index extends React.Component {
         {query && (
           <div className="container">
             {error && (
-              <div className="alert alert-danger mb-3">Error: {error}</div>
+              <div className="alert alert-danger mb-3">
+                Error: {String(error)}
+              </div>
             )}
 
             {inProgress && (
