@@ -1,4 +1,4 @@
 #!/bin/bash
 
 set -x
-exec java -jar /tika.jar --config=/aspen/config/tika.xml "$@"
+exec java -jar /tika.jar --config=/app/config/tika.xml "$@"
