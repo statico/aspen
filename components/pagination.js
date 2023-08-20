@@ -1,8 +1,8 @@
-import React from "react"
+import React from "react";
 
 class PageItem extends React.PureComponent {
   render() {
-    const { enabled, page, onSelectPage, icon, text } = this.props
+    const { enabled, page, onSelectPage, icon, text } = this.props;
     return (
       <li className={"page-item " + (enabled ? "" : "disabled")}>
         <a
@@ -10,21 +10,21 @@ class PageItem extends React.PureComponent {
           className="page-link"
           tabIndex={enabled ? null : -1}
           onClick={(e) => {
-            this.props.onSelectPage(page)
-            e.preventDefault()
+            this.props.onSelectPage(page);
+            e.preventDefault();
           }}
         >
           {icon && <span className={"fa fa-" + icon} />}
           {text && text}
         </a>
       </li>
-    )
+    );
   }
 }
 
 export default class Pagination extends React.PureComponent {
   render() {
-    const { currentPage, totalPages, onSelectPage } = this.props
+    const { currentPage, totalPages, onSelectPage } = this.props;
 
     // Since the pagination can get unweildly with, say, 100 pages, only show 10 or so buttons with
     // the currently selected page in the middle.
@@ -33,12 +33,12 @@ export default class Pagination extends React.PureComponent {
         ? [0, Math.min(totalPages, 9)]
         : currentPage > totalPages - 6
         ? [Math.max(0, totalPages - 10), totalPages]
-        : [currentPage - 5, currentPage + 5]
+        : [currentPage - 5, currentPage + 5];
 
     const pages = Array.from(
       new Array(lastPage - firstPage),
       (v, i) => firstPage + i
-    )
+    );
 
     return (
       <ul className="pagination justify-content-center">
@@ -57,7 +57,7 @@ export default class Pagination extends React.PureComponent {
               enabled={i !== currentPage}
               page={i}
             />
-          )
+          );
         })}
         <PageItem
           onSelectPage={onSelectPage}
@@ -66,6 +66,6 @@ export default class Pagination extends React.PureComponent {
           page={currentPage + 1}
         />
       </ul>
-    )
+    );
   }
 }

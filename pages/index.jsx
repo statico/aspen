@@ -1,25 +1,25 @@
-import { pluralize } from "humanize-plus"
-import Head from "next/head"
-import Router from "next/router"
-import qs from "qs"
-import React from "react"
-import request from "superagent"
-import DrillDown from "../components/drill-down.js"
-import Pagination from "../components/pagination.js"
-import SearchBar from "../components/search-bar.js"
-import { getOrigin, RESULTS_PER_PAGE } from "../lib/utils"
+import { pluralize } from "humanize-plus";
+import Head from "next/head";
+import Router from "next/router";
+import qs from "qs";
+import React from "react";
+import request from "superagent";
+import DrillDown from "../components/drill-down.js";
+import Pagination from "../components/pagination.js";
+import SearchBar from "../components/search-bar.js";
+import { getOrigin, RESULTS_PER_PAGE } from "../lib/utils";
 
 export default class Index extends React.Component {
   static async getInitialProps(props) {
-    let { query, page, sloppy } = props.query
-    return { query, page, sloppy }
+    let { query, page, sloppy } = props.query;
+    return { query, page, sloppy };
   }
 
   constructor(props) {
-    super(props)
+    super(props);
 
-    const { query, sloppy } = props
-    const page = (Number(props.page) || 1) - 1 // 'page' query param is 1-indexed
+    const { query, sloppy } = props;
+    const page = (Number(props.page) || 1) - 1; // 'page' query param is 1-indexed
     this.state = {
       query,
       page: page && page > 0 ? page : 0,
@@ -28,71 +28,71 @@ export default class Index extends React.Component {
       error: null,
       inProgress: !!query, // Make sure the shows a spinner instead of "0 results found" on load.
       drillDownResultId: null,
-    }
+    };
 
-    this.handleSearch = this.handleSearch.bind(this)
-    this.handleResultClick = this.handleResultClick.bind(this)
-    this.handleDrillDownDismiss = this.handleDrillDownDismiss.bind(this)
-    this.handlePageSelect = this.handlePageSelect.bind(this)
+    this.handleSearch = this.handleSearch.bind(this);
+    this.handleResultClick = this.handleResultClick.bind(this);
+    this.handleDrillDownDismiss = this.handleDrillDownDismiss.bind(this);
+    this.handlePageSelect = this.handlePageSelect.bind(this);
   }
 
   componentDidMount() {
-    this.doSearch()
+    this.doSearch();
   }
 
   handleSearch(newState) {
     this.setState(newState, () => {
       this.setState({ page: 0 }, () => {
-        this.doSearch()
-      })
-    })
+        this.doSearch();
+      });
+    });
   }
 
   handleResultClick(hitId) {
-    this.setState({ drillDownResultId: hitId })
+    this.setState({ drillDownResultId: hitId });
   }
 
   handleDrillDownDismiss() {
-    this.setState({ drillDownResultId: null })
+    this.setState({ drillDownResultId: null });
   }
 
   handlePageSelect(newPage) {
     this.setState({ results: null, page: newPage }, () => {
-      this.doSearch()
-    })
+      this.doSearch();
+    });
   }
 
   async doSearch() {
-    const { query, page, sloppy } = this.state
+    const { query, page, sloppy } = this.state;
 
     if (query == null) {
-      this.setState({ results: null })
-      return
+      this.setState({ results: null });
+      return;
     }
 
     try {
-      this.setState({ inProgress: true, results: null })
+      this.setState({ inProgress: true, results: null });
 
       const queryString = qs.stringify({
         query,
         page: page && page > 0 ? page + 1 : undefined,
         sloppy: sloppy ? 1 : undefined,
-      })
+      });
 
       // If we're typing fast, don't add incomplete queries to browser history.
       if (this.inFlightRequest) {
-        Router.replace("/?" + queryString)
+        Router.replace("/?" + queryString);
       } else {
-        Router.push("/?" + queryString)
+        Router.push("/?" + queryString);
       }
 
-      if (this.inFlightRequest) this.inFlightRequest.abort()
+      if (this.inFlightRequest) this.inFlightRequest.abort();
       const req = (this.inFlightRequest = request
         .get(getOrigin() + "/search")
         .query(queryString)
-        .withCredentials())
-      const response = await req
-      const obj = response.body
+        .withCredentials());
+      const response = await req;
+      const obj = response.body;
 
       if (obj.error) {
         // Elasticsearch will complain about broken queries, like '"foo' (missing a double quote)
@@ -108,17 +108,17 @@ export default class Index extends React.Component {
               </a>
               .
             </span>
-          )
+          );
         }
-        this.setState({ error: obj.error, results: null })
+        this.setState({ error: obj.error, results: null });
       } else {
-        this.setState({ error: null, results: obj })
+        this.setState({ error: null, results: obj });
       }
     } catch (err) {
-      console.error(`Error during request: ${err}`)
-      this.setState({ error: err })
+      console.error(`Error during request: ${err}`);
+      this.setState({ error: err });
     } finally {
-      this.setState({ inProgress: false })
+      this.setState({ inProgress: false });
     }
   }
 
@@ -131,9 +131,9 @@ export default class Index extends React.Component {
       results,
       drillDownResultId,
       error,
-    } = this.state
+    } = this.state;
     const totalPages =
-      results && Math.ceil(results.hits.total / RESULTS_PER_PAGE)
+      results && Math.ceil(results.hits.total / RESULTS_PER_PAGE);
     return (
       <div className="pb-3">
         <Head>
@@ -202,7 +202,7 @@ export default class Index extends React.Component {
                 <SearchResult
                   hit={hit}
                   onClick={() => {
-                    this.handleResultClick(hit._id)
+                    this.handleResultClick(hit._id);
                   }}
                 />
                 {drillDownResultId == hit._id && (
@@ -257,15 +257,15 @@ export default class Index extends React.Component {
           </div>
         }
       </div>
-    )
+    );
   }
 }
 
 class SearchResult extends React.Component {
   render() {
-    const { hit } = this.props // See Elasticsearch for how results are returned.
+    const { hit } = this.props; // See Elasticsearch for how results are returned.
     const highlight =
-      hit.highlight && (hit.highlight["text"] || hit.highlight["text.english"])
+      hit.highlight && (hit.highlight["text"] || hit.highlight["text.english"]);
     return (
       <div className="result" onClick={this.props.onClick || null}>
         <style jsx>{`
@@ -277,6 +277,6 @@ class SearchResult extends React.Component {
         <br />
         <p dangerouslySetInnerHTML={{ __html: highlight }} />
       </div>
-    )
+    );
   }
 }

@@ -1,14 +1,14 @@
-import React from "react"
+import React from "react";
 
 export default class SearchBar extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       query: props.query,
       sloppy: !!props.sloppy,
-    }
-    this.handleImmediateChange = this.handleImmediateChange.bind(this)
-    this.handleDelayedChange = this.handleDelayedChange.bind(this)
+    };
+    this.handleImmediateChange = this.handleImmediateChange.bind(this);
+    this.handleDelayedChange = this.handleDelayedChange.bind(this);
   }
 
   _handleChange(cb) {
@@ -18,29 +18,29 @@ export default class SearchBar extends React.Component {
         sloppy: !!this.sloppyCheckbox.checked,
       },
       cb
-    )
+    );
   }
 
   handleImmediateChange(event) {
     // Don't reload the page if this came from an onSubmit.
-    if (event.target.tagName.toLowerCase() === "form") event.preventDefault()
+    if (event.target.tagName.toLowerCase() === "form") event.preventDefault();
     this._handleChange(() => {
-      clearTimeout(this.timer)
-      this.props.onSearch(this.state)
-    })
+      clearTimeout(this.timer);
+      this.props.onSearch(this.state);
+    });
   }
 
   handleDelayedChange(event) {
     this._handleChange(() => {
-      clearTimeout(this.timer)
+      clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.props.onSearch(this.state)
-      }, 500)
-    })
+        this.props.onSearch(this.state);
+      }, 500);
+    });
   }
 
   render() {
-    const { query, sloppy } = this.state
+    const { query, sloppy } = this.state;
     return (
       <div>
         <header className="py-3 mb-3" style={{ background: "#eee" }}>
@@ -65,7 +65,7 @@ export default class SearchBar extends React.Component {
                   autoFocus
                   value={query == null ? "" : query}
                   ref={(el) => {
-                    this.queryInput = el
+                    this.queryInput = el;
                   }}
                   onChange={this.handleDelayedChange}
                 />
@@ -84,7 +84,7 @@ export default class SearchBar extends React.Component {
                     type="checkbox"
                     checked={sloppy}
                     ref={(el) => {
-                      this.sloppyCheckbox = el
+                      this.sloppyCheckbox = el;
                     }}
                     onChange={this.handleImmediateChange}
                   />
@@ -106,6 +106,6 @@ export default class SearchBar extends React.Component {
           </div>
         </header>
       </div>
-    )
+    );
   }
 }

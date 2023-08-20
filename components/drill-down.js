@@ -1,96 +1,96 @@
-import React from "react"
-import request from "superagent"
-import { getOrigin } from "../lib/utils"
+import React from "react";
+import request from "superagent";
+import { getOrigin } from "../lib/utils";
 
 export default class DrillDownOverlay extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       content: null,
       contentWithMarkup: null,
       currentLocation: 0,
-    }
-    this.canGoToPreviousLocation = this.canGoToPreviousLocation.bind(this)
-    this.canGoToNextLocation = this.canGoToNextLocation.bind(this)
-    this.goToNextLocation = this.goToNextLocation.bind(this)
-    this.goToPreviousLocation = this.goToPreviousLocation.bind(this)
+    };
+    this.canGoToPreviousLocation = this.canGoToPreviousLocation.bind(this);
+    this.canGoToNextLocation = this.canGoToNextLocation.bind(this);
+    this.goToNextLocation = this.goToNextLocation.bind(this);
+    this.goToPreviousLocation = this.goToPreviousLocation.bind(this);
   }
 
   get url() {
-    return getOrigin() + "/data/" + this.props.hit._source.path
+    return getOrigin() + "/data/" + this.props.hit._source.path;
   }
 
   async componentDidMount() {
-    let response
+    let response;
     try {
-      response = await request(this.url).withCredentials()
+      response = await request(this.url).withCredentials();
     } catch (err) {
       this.setState({
         contentWithMarkup: `<pre class="text-danger">Request failed: ${err}</pre>`,
-      })
-      return
+      });
+      return;
     }
-    const content = response.text
+    const content = response.text;
 
     // Surround each highlight with <mark> tags, and also escape any existing markup (even though
     // there shouldn't be any)
-    let markup = ""
-    let last = 0
+    let markup = "";
+    let last = 0;
     for (let [start, end] of this.props.hit.highlight_locations) {
       markup +=
         content.substring(last, start) +
         "__STARTSPAN__" +
         content.substring(start, end) +
-        "__ENDSPAN__"
-      last = end
+        "__ENDSPAN__";
+      last = end;
     }
-    markup += content.substring(last)
+    markup += content.substring(last);
     markup = markup
       .replace(/</g, "&lt;")
       .replace(/__STARTSPAN__/g, "<mark>")
-      .replace(/__ENDSPAN__/g, "</mark>")
+      .replace(/__ENDSPAN__/g, "</mark>");
 
     // Markdown-style paragraphs
-    markup = markup.replace(/\n\n+/g, "<br/><br/>")
+    markup = markup.replace(/\n\n+/g, "<br/><br/>");
 
     this.setState({ contentWithMarkup: markup }, () => {
-      this.setLocation(0)
-    })
+      this.setLocation(0);
+    });
   }
 
   canGoToNextLocation() {
     return (
       this.state.currentLocation < this.props.hit.highlight_locations.length - 1
-    )
+    );
   }
   canGoToPreviousLocation() {
-    return this.state.currentLocation > 0
+    return this.state.currentLocation > 0;
   }
   goToNextLocation() {
     if (this.canGoToNextLocation())
-      this.setLocation(this.state.currentLocation + 1)
+      this.setLocation(this.state.currentLocation + 1);
   }
   goToPreviousLocation() {
     if (this.canGoToPreviousLocation())
-      this.setLocation(this.state.currentLocation - 1)
+      this.setLocation(this.state.currentLocation - 1);
   }
 
   setLocation(newLocation) {
     this.setState({ currentLocation: newLocation }, () => {
-      const container = this.contentViewer.parentElement
-      const mark = this.contentViewer.getElementsByTagName("mark")[newLocation]
+      const container = this.contentViewer.parentElement;
+      const mark = this.contentViewer.getElementsByTagName("mark")[newLocation];
       if (!mark) {
-        console.warn(`Tried to scroll to mark ${newLocation} but it was null`)
-        return
+        console.warn(`Tried to scroll to mark ${newLocation} but it was null`);
+        return;
       }
-      container.scrollTop = mark.offsetTop - 100
-    })
+      container.scrollTop = mark.offsetTop - 100;
+    });
   }
 
   render() {
-    const { hit } = this.props
-    const { contentWithMarkup } = this.state
-    const directoryUrl = this.url.substring(0, this.url.lastIndexOf("/") + 1)
+    const { hit } = this.props;
+    const { contentWithMarkup } = this.state;
+    const directoryUrl = this.url.substring(0, this.url.lastIndexOf("/") + 1);
     return (
       <div
         className="modal fade show d-block"
@@ -187,7 +187,7 @@ export default class DrillDownOverlay extends React.Component {
               <div className="modal-body">
                 <div
                   ref={(el) => {
-                    this.contentViewer = el
+                    this.contentViewer = el;
                   }}
                   dangerouslySetInnerHTML={{ __html: contentWithMarkup }}
                 />
@@ -196,6 +196,6 @@ export default class DrillDownOverlay extends React.Component {
           </div>
         </div>
       </div>
-    )
+    );
   }
 }
