@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-const chalk = require("chalk");
 const commander = require("commander");
 const elasticsearch = require("../lib/elasticsearch");
 const fs = require("fs");
@@ -22,19 +21,15 @@ commander
   .parse(process.argv);
 
 const { basedir } = commander;
-console.log(chalk.yellow("→"), `Base directory is ${basedir}`);
+console.log(`Base directory is ${basedir}`);
 
 async function upload(path) {
   try {
     const title = await extractTitle(path);
     await elasticsearch.upload(basedir, path, title);
-    console.log(
-      chalk.green("→"),
-      `${relative(basedir, path)}`,
-      chalk.bold.blue(`→ ${title}`)
-    );
+    console.log(`→ ${relative(basedir, path)}`, `→ ${title}`);
   } catch (err) {
-    console.error(chalk.red("✗"), err);
+    console.error("✗", err);
   }
 }
 
@@ -44,13 +39,12 @@ function walk(dir, fn) {
     let walker = walklib.walk(dir, { followLinks: true });
     walker.on("file", (root, stat, next) => {
       if (/\.txt$/i.test(stat.name)) paths.push(join(root, stat.name));
-      else
-        console.log(chalk.yellow("▲"), `Ignoring non-text path: ${stat.name}`);
+      else console.log(`▲ Ignoring non-text path: ${stat.name}`);
       next();
     });
     walker.on("errors", (root, stat, next) => {
       stats.forEach((stat) => {
-        console.error(chalk.red("✗"), `Error for ${stat.name}: ${stat.error}`);
+        console.error(`✗ Error for ${stat.name}: ${stat.error}`);
       });
       next();
     });
@@ -79,9 +73,9 @@ function walk(dir, fn) {
         await upload(path);
       }
     }
-    console.log(chalk.green("✓"), "Done!");
+    console.log("✓ Done!");
   } catch (err) {
-    console.error(chalk.red("✗"), err.toString());
+    console.error("✗", err.toString());
     process.exit(1);
   }
 })();
