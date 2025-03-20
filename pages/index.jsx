@@ -137,7 +137,7 @@ export default class Index extends React.Component {
     return (
       <div className="pb-3">
         <Head>
-          <title>{query ? `${query} -` : ""} Aspen</title>
+          <title>{query ? `${query} - Aspen` : "Aspen"}</title>
         </Head>
 
         <style global jsx>{`
