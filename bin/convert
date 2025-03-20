@@ -14,8 +14,8 @@ trap "rm -f $tempfile" EXIT
 for src in "$@" ; do
 
   if [ ! -f "$src" ]; then
-    echo "$src doesn't exist, trying /data/$src"
-    src="/data/$src"
+    echo "$src doesn't exist, trying /app/public/data/$src"
+    src="/app/public/data/$src"
   fi
   if [ ! -e "$src" ]; then
     echo "Can't find file: $src"
