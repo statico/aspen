@@ -1,19 +1,21 @@
-FROM node:16
+FROM node:22
 
 RUN apt-get update
-RUN apt-get install -y unrtf par git openjdk-11-jre-headless curl
+RUN apt-get install -y unrtf par git openjdk-17-jre-headless curl
 
 RUN curl -sL https://archive.apache.org/dist/tika/tika-app-1.22.jar >/tika.jar
 
 WORKDIR /app
-COPY package.json yarn.lock ./
-RUN yarn --production
+ENV HUSKY=0
+RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod
 COPY ./ /app/
-RUN yarn run build
+RUN pnpm run build
 
 ENV PATH=$PATH:/app/node_modules/.bin:/app/bin
 
 VOLUME /app/public/data
 
 EXPOSE 3000
-CMD ["yarn", "start"]
+CMD ["pnpm", "start"]

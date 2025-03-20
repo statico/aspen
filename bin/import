@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const commander = require("commander");
+const { program } = require("commander");
 const elasticsearch = require("../lib/elasticsearch");
 const fs = require("fs");
 const pathIsInside = require("path-is-inside");
@@ -8,7 +8,7 @@ const walklib = require("walk");
 const extractTitle = require("../lib/extract-title");
 const { join, relative, resolve } = require("path");
 
-commander
+program
   .description(
     "Import one or more files or directories in public/data. Will import everything if not given any arguments.."
   )
@@ -17,10 +17,15 @@ commander
     "-d, --basedir <path>",
     "Set the path to public/data",
     join(__dirname, "../public/data")
-  )
-  .parse(process.argv);
+  );
 
-const { basedir } = commander;
+program.parse();
+
+const basedir = resolve(program.opts().basedir);
+if (!basedir) {
+  console.error("✗ --basedir is required");
+  process.exit(1);
+}
 console.log(`Base directory is ${basedir}`);
 
 async function upload(path) {
@@ -56,7 +61,7 @@ function walk(dir, fn) {
 
 (async function () {
   try {
-    let args = commander.args.length > 0 ? commander.args : [basedir];
+    let args = program.args.length > 0 ? program.args : [basedir];
     for (let arg of args) {
       let path = resolve(arg);
       if (!fs.existsSync(path)) path = join(resolve(basedir), arg);

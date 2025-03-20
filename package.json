@@ -10,10 +10,10 @@
     "dev": "node server.js",
     "build": "next build",
     "start": "NODE_ENV=production node server.js",
-    "prepare": "husky install"
+    "prepare": "husky || true"
   },
   "dependencies": {
-    "commander": "^10.0.0",
+    "commander": "^13.1.0",
     "express": "4.18.2",
     "humanize-plus": "^1.8.2",
     "line-reader": "^0.4.0",
@@ -23,12 +23,12 @@
     "react": "18",
     "react-dom": "18",
     "serve-index": "^1.9.1",
-    "superagent": "^8.0.9",
+    "superagent": "^10.2.0",
     "walk": "^2.3.15"
   },
   "devDependencies": {
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
     "prettier": "2.8.7"
   },
   "lint-staged": {
