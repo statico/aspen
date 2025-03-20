@@ -98,9 +98,10 @@ You can get Node and Yarn via [Homebrew](https://brew.sh/) on Mac, or you can do
 
 For document conversation (`bin/convert`) you'll want:
 
-1. [Apache Tika](https://tika.apache.org/)
-1. [UnRTF](https://www.gnu.org/software/unrtf/)
-1. [Par](http://www.nicemice.net/par/)
+1. [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF) - for turning image-only PDFs into PDFs with embedded text
+1. [Apache Tika](https://tika.apache.org/) - for converting most documents into text, like PDFs with embedded text
+1. [UnRTF](https://www.gnu.org/software/unrtf/) - better at converting RTF than Tika
+1. [Par](http://www.nicemice.net/par/) - for formatting plaintext documents
 
 On macOS you can `brew install node tika unrtf par`.
 
