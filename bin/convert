@@ -35,7 +35,7 @@ for src in "$@" ; do
   else
     (
       echo '---'
-      $(dirname $0)/tika -m "$src"
+      java -jar /tika.jar -m "$src"
       echo '---'
       echo
       # Tika parses paragraphs properly, but when converting to text the paragraphs are lost. Make
