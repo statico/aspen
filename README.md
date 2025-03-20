@@ -3,7 +3,7 @@
 Aspen lets you search a large corpus of plain text files via the browser.
 
 [![license](https://img.shields.io/github/license/statico/aspen.svg?style=flat)](https://github.com/statico/aspen/blob/master/LICENSE)
-[![build status](https://img.shields.io/github/actions/workflow/status/statico/aspen/build.yml?branch=main&style=flat-square)](https://ghcr.io/statico/aspen)
+[![build](https://github.com/statico/aspen/actions/workflows/build.yml/badge.svg)](https://github.com/statico/aspen/actions/workflows/build.yml)
 
 [![example](https://imgur.com/30X4t9A.gif)](https://imgur.com/30X4t9A)
 
