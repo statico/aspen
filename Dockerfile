@@ -13,7 +13,7 @@ RUN pnpm install --prod
 COPY ./ /app/
 RUN pnpm run build
 
-ENV PATH=$PATH:/app/node_modules/.bin:/app/bin
+ENV PATH=/app/bin:$PATH:/app/node_modules/.bin
 
 VOLUME /app/public/data
 
